@@ -1,26 +1,184 @@
 @import "tailwindcss";
 
+/* Dark mode follows [data-theme="dark"] on <html>, which the pre-hydration
+   script sets from the stored preference or prefers-color-scheme. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ---------- Raw palette (single source of truth for hex values) ---------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ic-white: #ffffff;
+  --ic-black: #000000;
+  --ic-gray-50: #fafafa;
+  --ic-gray-100: #efefef;
+  --ic-gray-300: #dbdbdb;
+  --ic-gray-500: #737373;
+  --ic-gray-400: #a8a8a8;
+  --ic-gray-800: #262626;
+  --ic-gray-850: #1a1a1a;
+  --ic-gray-900: #121212;
+  --ic-gray-50-dark: #f5f5f5;
+  --ic-blue: #0095f6;
+  --ic-blue-hover: #1877f2;
+  --ic-red: #ff3040;
+  --ic-error: #ed4956;
+
+  /* Semantic, light */
+  --ic-bg: var(--ic-white);
+  --ic-bg-secondary: var(--ic-gray-50);
+  --ic-elevated: var(--ic-white);
+  --ic-hover: var(--ic-gray-100);
+  --ic-border: var(--ic-gray-300);
+  --ic-fg: var(--ic-black);
+  --ic-muted: var(--ic-gray-500);
+  --ic-overlay: rgb(0 0 0 / 0.65);
+  --ic-skeleton: var(--ic-gray-100);
+  color-scheme: light;
 }
 
+[data-theme="dark"] {
+  --ic-bg: var(--ic-black);
+  --ic-bg-secondary: var(--ic-gray-900);
+  --ic-elevated: var(--ic-gray-900);
+  --ic-hover: var(--ic-gray-850);
+  --ic-border: var(--ic-gray-800);
+  --ic-fg: var(--ic-gray-50-dark);
+  --ic-muted: var(--ic-gray-400);
+  --ic-overlay: rgb(0 0 0 / 0.75);
+  --ic-skeleton: var(--ic-gray-800);
+  color-scheme: dark;
+}
+
+/* ---------- Tailwind v4 theme tokens ---------- */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --color-background: var(--ic-bg);
+  --color-secondary: var(--ic-bg-secondary);
+  --color-elevated: var(--ic-elevated);
+  --color-hover: var(--ic-hover);
+  --color-separator: var(--ic-border);
+  --color-foreground: var(--ic-fg);
+  --color-muted: var(--ic-muted);
+  --color-overlay: var(--ic-overlay);
+  --color-skeleton: var(--ic-skeleton);
+  --color-primary: var(--ic-blue);
+  --color-primary-hover: var(--ic-blue-hover);
+  --color-like: var(--ic-red);
+  --color-danger: var(--ic-error);
+  --color-on-media: var(--ic-white);
+
+  --color-story-1: #feda75;
+  --color-story-2: #fa7e1e;
+  --color-story-3: #d62976;
+  --color-story-4: #962fbf;
+  --color-story-5: #4f5bd5;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@theme {
+  /* Type scale in px (root is 14px, so rem-based defaults would render small). */
+  --text-xs: 12.5px;
+  --text-xs--line-height: 16px;
+  --text-sm: 14px;
+  --text-sm--line-height: 18px;
+  --text-base: 16px;
+  --text-base--line-height: 22px;
+  --text-xl: 19.5px;
+  --text-xl--line-height: 26px;
+  --text-2xl: 23px;
+  --text-2xl--line-height: 30px;
+  --text-4xl: 33.5px;
+  --text-4xl--line-height: 40px;
+
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1160px;
+  --breakpoint-xl: 1264px;
+
+  --container-feed: 470px;
+  --container-sidebar: 244px;
+  --container-sidebar-collapsed: 72px;
+  --container-panel: 397px;
+  --container-content: 935px;
+
+  --spacing-avatar-xs: 24px;
+  --spacing-avatar-sm: 32px;
+  --spacing-avatar-md: 44px;
+  --spacing-avatar-lg: 56px;
+  --spacing-avatar-profile: 77px;
+  --spacing-avatar-xl: 150px;
+  --spacing-topbar: 60px;
+  --spacing-bottomnav: 50px;
+
+  --animate-heart: heart-burst 900ms ease-out forwards;
+  --animate-like: like-pop 350ms ease-out;
+  --animate-fade-in: fade-in 150ms ease-out;
+  --animate-slide-in: slide-in 250ms ease-out;
+  --animate-toast: toast-in 200ms ease-out;
+
+  @keyframes heart-burst {
+    0% { transform: scale(0); opacity: 0; }
+    15% { transform: scale(1.2); opacity: 0.95; }
+    30% { transform: scale(0.95); opacity: 0.95; }
+    45%, 80% { transform: scale(1); opacity: 0.95; }
+    100% { transform: scale(0); opacity: 0; }
+  }
+  @keyframes like-pop {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.25); }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slide-in {
+    from { transform: translateX(-24px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  @keyframes toast-in {
+    from { transform: translateY(16px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@utility story-ring {
+  background-image: linear-gradient(
+    45deg,
+    var(--color-story-1),
+    var(--color-story-2),
+    var(--color-story-3),
+    var(--color-story-4),
+    var(--color-story-5)
+  );
+}
+
+@utility scrollbar-none {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer base {
+  html {
+    font-size: 14px;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground font-sans text-base antialiased;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 1ms !important;
+      transition-duration: 1ms !important;
+    }
+  }
 }

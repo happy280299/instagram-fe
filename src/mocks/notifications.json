@@ -1,0 +1,362 @@
+[
+  {
+    "id": "n1",
+    "type": "like",
+    "actorId": "u3",
+    "postId": "p5",
+    "text": null,
+    "read": false,
+    "createdAt": "2026-01-01T11:57:00.000Z"
+  },
+  {
+    "id": "n2",
+    "type": "follow",
+    "actorId": "u18",
+    "postId": null,
+    "text": null,
+    "read": false,
+    "createdAt": "2026-01-01T08:45:00.000Z"
+  },
+  {
+    "id": "n3",
+    "type": "comment",
+    "actorId": "u28",
+    "postId": "p6",
+    "text": "Love the colors",
+    "read": false,
+    "createdAt": "2026-01-01T04:27:00.000Z"
+  },
+  {
+    "id": "n4",
+    "type": "mention",
+    "actorId": "u19",
+    "postId": "p2",
+    "text": "So beautiful 🙌",
+    "read": false,
+    "createdAt": "2026-01-01T04:57:00.000Z"
+  },
+  {
+    "id": "n5",
+    "type": "like",
+    "actorId": "u3",
+    "postId": "p5",
+    "text": null,
+    "read": false,
+    "createdAt": "2026-01-01T09:13:00.000Z"
+  },
+  {
+    "id": "n6",
+    "type": "follow",
+    "actorId": "u22",
+    "postId": null,
+    "text": null,
+    "read": false,
+    "createdAt": "2025-12-31T17:02:00.000Z"
+  },
+  {
+    "id": "n7",
+    "type": "follow",
+    "actorId": "u25",
+    "postId": null,
+    "text": null,
+    "read": false,
+    "createdAt": "2026-01-01T07:03:00.000Z"
+  },
+  {
+    "id": "n8",
+    "type": "comment",
+    "actorId": "u28",
+    "postId": "p1",
+    "text": "Goals!!",
+    "read": true,
+    "createdAt": "2025-12-31T04:55:00.000Z"
+  },
+  {
+    "id": "n9",
+    "type": "comment",
+    "actorId": "u25",
+    "postId": "p5",
+    "text": "Wow 😍",
+    "read": true,
+    "createdAt": "2026-01-01T07:09:00.000Z"
+  },
+  {
+    "id": "n10",
+    "type": "follow",
+    "actorId": "u17",
+    "postId": null,
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-31T02:57:00.000Z"
+  },
+  {
+    "id": "n11",
+    "type": "comment",
+    "actorId": "u30",
+    "postId": "p6",
+    "text": "Incredible shot",
+    "read": true,
+    "createdAt": "2025-12-31T22:27:00.000Z"
+  },
+  {
+    "id": "n12",
+    "type": "mention",
+    "actorId": "u19",
+    "postId": "p2",
+    "text": "Obsessed with this",
+    "read": true,
+    "createdAt": "2025-12-30T10:05:00.000Z"
+  },
+  {
+    "id": "n13",
+    "type": "mention",
+    "actorId": "u18",
+    "postId": "p3",
+    "text": "This is stunning!",
+    "read": true,
+    "createdAt": "2025-12-31T22:57:00.000Z"
+  },
+  {
+    "id": "n14",
+    "type": "follow",
+    "actorId": "u15",
+    "postId": null,
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-29T18:57:00.000Z"
+  },
+  {
+    "id": "n15",
+    "type": "like",
+    "actorId": "u13",
+    "postId": "p6",
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-29T18:37:00.000Z"
+  },
+  {
+    "id": "n16",
+    "type": "like",
+    "actorId": "u19",
+    "postId": "p4",
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-30T18:57:00.000Z"
+  },
+  {
+    "id": "n17",
+    "type": "like",
+    "actorId": "u9",
+    "postId": "p3",
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-31T02:21:00.000Z"
+  },
+  {
+    "id": "n18",
+    "type": "mention",
+    "actorId": "u3",
+    "postId": "p1",
+    "text": "Need to go here asap",
+    "read": true,
+    "createdAt": "2025-12-30T12:04:00.000Z"
+  },
+  {
+    "id": "n19",
+    "type": "like",
+    "actorId": "u20",
+    "postId": "p5",
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-31T07:27:00.000Z"
+  },
+  {
+    "id": "n20",
+    "type": "like",
+    "actorId": "u6",
+    "postId": "p5",
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-30T08:20:00.000Z"
+  },
+  {
+    "id": "n21",
+    "type": "comment",
+    "actorId": "u16",
+    "postId": "p1",
+    "text": "Goals!!",
+    "read": true,
+    "createdAt": "2025-12-31T01:37:00.000Z"
+  },
+  {
+    "id": "n22",
+    "type": "like",
+    "actorId": "u2",
+    "postId": "p4",
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-30T22:09:00.000Z"
+  },
+  {
+    "id": "n23",
+    "type": "comment",
+    "actorId": "u10",
+    "postId": "p6",
+    "text": "Frame-worthy",
+    "read": true,
+    "createdAt": "2025-12-28T20:41:00.000Z"
+  },
+  {
+    "id": "n24",
+    "type": "like",
+    "actorId": "u30",
+    "postId": "p3",
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-28T09:03:00.000Z"
+  },
+  {
+    "id": "n25",
+    "type": "comment",
+    "actorId": "u14",
+    "postId": "p4",
+    "text": "👏👏",
+    "read": true,
+    "createdAt": "2025-12-31T12:45:00.000Z"
+  },
+  {
+    "id": "n26",
+    "type": "like",
+    "actorId": "u14",
+    "postId": "p3",
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-29T21:02:00.000Z"
+  },
+  {
+    "id": "n27",
+    "type": "like",
+    "actorId": "u23",
+    "postId": "p6",
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-31T07:47:00.000Z"
+  },
+  {
+    "id": "n28",
+    "type": "comment",
+    "actorId": "u21",
+    "postId": "p6",
+    "text": "The vibes ✨",
+    "read": true,
+    "createdAt": "2025-12-30T14:03:00.000Z"
+  },
+  {
+    "id": "n29",
+    "type": "comment",
+    "actorId": "u28",
+    "postId": "p6",
+    "text": "Take me with you next time",
+    "read": true,
+    "createdAt": "2025-12-30T09:33:00.000Z"
+  },
+  {
+    "id": "n30",
+    "type": "mention",
+    "actorId": "u29",
+    "postId": "p2",
+    "text": "The vibes ✨",
+    "read": true,
+    "createdAt": "2025-12-29T12:54:00.000Z"
+  },
+  {
+    "id": "n31",
+    "type": "like",
+    "actorId": "u25",
+    "postId": "p6",
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-31T10:57:00.000Z"
+  },
+  {
+    "id": "n32",
+    "type": "like",
+    "actorId": "u4",
+    "postId": "p6",
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-29T21:57:00.000Z"
+  },
+  {
+    "id": "n33",
+    "type": "follow",
+    "actorId": "u2",
+    "postId": null,
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-27T11:25:00.000Z"
+  },
+  {
+    "id": "n34",
+    "type": "like",
+    "actorId": "u4",
+    "postId": "p6",
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-27T09:18:00.000Z"
+  },
+  {
+    "id": "n35",
+    "type": "like",
+    "actorId": "u3",
+    "postId": "p6",
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-26T13:43:00.000Z"
+  },
+  {
+    "id": "n36",
+    "type": "mention",
+    "actorId": "u20",
+    "postId": "p4",
+    "text": "Take me with you next time",
+    "read": true,
+    "createdAt": "2025-12-29T12:47:00.000Z"
+  },
+  {
+    "id": "n37",
+    "type": "follow",
+    "actorId": "u21",
+    "postId": null,
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-28T14:21:00.000Z"
+  },
+  {
+    "id": "n38",
+    "type": "mention",
+    "actorId": "u22",
+    "postId": "p1",
+    "text": "Take me with you next time",
+    "read": true,
+    "createdAt": "2025-12-30T13:05:00.000Z"
+  },
+  {
+    "id": "n39",
+    "type": "mention",
+    "actorId": "u14",
+    "postId": "p6",
+    "text": "Where is this?",
+    "read": true,
+    "createdAt": "2025-12-25T19:05:00.000Z"
+  },
+  {
+    "id": "n40",
+    "type": "like",
+    "actorId": "u7",
+    "postId": "p5",
+    "text": null,
+    "read": true,
+    "createdAt": "2025-12-30T20:57:00.000Z"
+  }
+]

@@ -1,0 +1,222 @@
+[
+  {
+    "id": "r1",
+    "authorId": "u1",
+    "videoUrl": "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4",
+    "poster": "https://picsum.photos/seed/reel0/540/960",
+    "caption": "Golden hour never disappoints with @lucas_berg. #design #streetphoto #foodie",
+    "audio": "Summer Nights · Indie Mix",
+    "likes": 67548,
+    "commentsCount": 229,
+    "createdAt": "2025-12-21T08:11:00.000Z"
+  },
+  {
+    "id": "r2",
+    "authorId": "u7",
+    "videoUrl": "https://test-videos.co.uk/vids/jellyfish/mp4/h264/360/Jellyfish_360_10s_1MB.mp4",
+    "poster": "https://picsum.photos/seed/reel1/540/960",
+    "caption": "Grateful for slow mornings. Honestly one of the best days I've had in a long while — the kind of day where everything lines up, the weather cooperates and the people around you make it unforgettable. #beach #weekend #mountains",
+    "audio": "Acoustic Morning",
+    "likes": 62273,
+    "commentsCount": 688,
+    "createdAt": "2025-12-21T14:44:00.000Z"
+  },
+  {
+    "id": "r3",
+    "authorId": "u25",
+    "videoUrl": "https://test-videos.co.uk/vids/sintel/mp4/h264/360/Sintel_360_10s_1MB.mp4",
+    "poster": "https://picsum.photos/seed/reel2/540/960",
+    "caption": "Some days are just better than others. Honestly one of the best days I've had in a long while — the kind of day where everything lines up, the weather cooperates and the people around you make it unforgettable. #minimal #foodie",
+    "audio": "Synthwave Drive",
+    "likes": 35192,
+    "commentsCount": 259,
+    "createdAt": "2025-12-29T11:16:00.000Z"
+  },
+  {
+    "id": "r4",
+    "authorId": "u17",
+    "videoUrl": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+    "poster": "https://picsum.photos/seed/reel3/540/960",
+    "caption": "Weekend mode: on. #sunset",
+    "audio": "Synthwave Drive",
+    "likes": 72284,
+    "commentsCount": 377,
+    "createdAt": "2025-12-31T04:11:00.000Z"
+  },
+  {
+    "id": "r5",
+    "authorId": "u22",
+    "videoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "poster": "https://picsum.photos/seed/reel4/540/960",
+    "caption": "Weekend mode: on with @luna.moreau. #weekend",
+    "audio": "Summer Nights · Indie Mix",
+    "likes": 84823,
+    "commentsCount": 325,
+    "createdAt": "2025-12-19T14:13:00.000Z"
+  },
+  {
+    "id": "r6",
+    "authorId": "u29",
+    "videoUrl": "https://media.w3.org/2010/05/bunny/trailer.mp4",
+    "poster": "https://picsum.photos/seed/reel5/540/960",
+    "caption": "Pages from my sketchbook with @elle_rivera37. Honestly one of the best days I've had in a long while — the kind of day where everything lines up, the weather cooperates and the people around you make it unforgettable. #goodvibes",
+    "audio": "Original audio",
+    "likes": 34588,
+    "commentsCount": 479,
+    "createdAt": "2025-12-28T08:14:00.000Z"
+  },
+  {
+    "id": "r7",
+    "authorId": "u23",
+    "videoUrl": "https://media.w3.org/2010/05/video/movie_300.mp4",
+    "poster": "https://picsum.photos/seed/reel6/540/960",
+    "caption": "New favorite spot in town. #photography #design",
+    "audio": "Lo-fi Beats · Chill Hop",
+    "likes": 82791,
+    "commentsCount": 401,
+    "createdAt": "2025-12-31T13:39:00.000Z"
+  },
+  {
+    "id": "r8",
+    "authorId": "u16",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "poster": "https://picsum.photos/seed/reel7/540/960",
+    "caption": "Exploring the unknown with @milo_reyes. #coffee",
+    "audio": "Synthwave Drive",
+    "likes": 36008,
+    "commentsCount": 779,
+    "createdAt": "2025-12-30T14:19:00.000Z"
+  },
+  {
+    "id": "r9",
+    "authorId": "u2",
+    "videoUrl": "https://download.samplelib.com/mp4/sample-5s.mp4",
+    "poster": "https://picsum.photos/seed/reel8/540/960",
+    "caption": "This light though…. Honestly one of the best days I've had in a long while — the kind of day where everything lines up, the weather cooperates and the people around you make it unforgettable. #streetphoto",
+    "audio": "Lo-fi Beats · Chill Hop",
+    "likes": 12154,
+    "commentsCount": 561,
+    "createdAt": "2026-01-01T01:24:00.000Z"
+  },
+  {
+    "id": "r10",
+    "authorId": "u4",
+    "videoUrl": "https://download.samplelib.com/mp4/sample-10s.mp4",
+    "poster": "https://picsum.photos/seed/reel9/540/960",
+    "caption": "Small moments, big feelings. #nature #mountains",
+    "audio": "Lo-fi Beats · Chill Hop",
+    "likes": 22857,
+    "commentsCount": 284,
+    "createdAt": "2025-12-18T18:26:00.000Z"
+  },
+  {
+    "id": "r11",
+    "authorId": "u3",
+    "videoUrl": "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/360/Big_Buck_Bunny_360_10s_1MB.mp4",
+    "poster": "https://picsum.photos/seed/reel10/540/960",
+    "caption": "Exploring the unknown with @ethan.nguyen15. #foodie",
+    "audio": "Acoustic Morning",
+    "likes": 41020,
+    "commentsCount": 166,
+    "createdAt": "2025-12-30T13:55:00.000Z"
+  },
+  {
+    "id": "r12",
+    "authorId": "u20",
+    "videoUrl": "https://test-videos.co.uk/vids/jellyfish/mp4/h264/360/Jellyfish_360_10s_1MB.mp4",
+    "poster": "https://picsum.photos/seed/reel11/540/960",
+    "caption": "Grateful for slow mornings. Honestly one of the best days I've had in a long while — the kind of day where everything lines up, the weather cooperates and the people around you make it unforgettable. #mountains #beach #nature",
+    "audio": "Acoustic Morning",
+    "likes": 24931,
+    "commentsCount": 703,
+    "createdAt": "2025-12-31T13:30:00.000Z"
+  },
+  {
+    "id": "r13",
+    "authorId": "u10",
+    "videoUrl": "https://test-videos.co.uk/vids/sintel/mp4/h264/360/Sintel_360_10s_1MB.mp4",
+    "poster": "https://picsum.photos/seed/reel12/540/960",
+    "caption": "New favorite spot in town. Honestly one of the best days I've had in a long while — the kind of day where everything lines up, the weather cooperates and the people around you make it unforgettable. #citylife #sunset #streetphoto",
+    "audio": "Acoustic Morning",
+    "likes": 13644,
+    "commentsCount": 113,
+    "createdAt": "2025-12-24T01:12:00.000Z"
+  },
+  {
+    "id": "r14",
+    "authorId": "u7",
+    "videoUrl": "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+    "poster": "https://picsum.photos/seed/reel13/540/960",
+    "caption": "This light though…. Honestly one of the best days I've had in a long while — the kind of day where everything lines up, the weather cooperates and the people around you make it unforgettable. #minimal #citylife #weekend",
+    "audio": "Lo-fi Beats · Chill Hop",
+    "likes": 43364,
+    "commentsCount": 622,
+    "createdAt": "2026-01-01T07:27:00.000Z"
+  },
+  {
+    "id": "r15",
+    "authorId": "u1",
+    "videoUrl": "https://media.w3.org/2010/05/sintel/trailer.mp4",
+    "poster": "https://picsum.photos/seed/reel14/540/960",
+    "caption": "Weekend mode: on. #travel",
+    "audio": "Acoustic Morning",
+    "likes": 15165,
+    "commentsCount": 439,
+    "createdAt": "2025-12-31T13:58:00.000Z"
+  },
+  {
+    "id": "r16",
+    "authorId": "u1",
+    "videoUrl": "https://media.w3.org/2010/05/bunny/trailer.mp4",
+    "poster": "https://picsum.photos/seed/reel15/540/960",
+    "caption": "Can't stop thinking about this view. Honestly one of the best days I've had in a long while — the kind of day where everything lines up, the weather cooperates and the people around you make it unforgettable. #foodie #photography",
+    "audio": "Acoustic Morning",
+    "likes": 80109,
+    "commentsCount": 104,
+    "createdAt": "2025-12-20T16:40:00.000Z"
+  },
+  {
+    "id": "r17",
+    "authorId": "u4",
+    "videoUrl": "https://media.w3.org/2010/05/video/movie_300.mp4",
+    "poster": "https://picsum.photos/seed/reel16/540/960",
+    "caption": "Small moments, big feelings with @zoe.okafor78. #beach #foodie #photography",
+    "audio": "Lo-fi Beats · Chill Hop",
+    "likes": 1922,
+    "commentsCount": 657,
+    "createdAt": "2025-12-30T17:41:00.000Z"
+  },
+  {
+    "id": "r18",
+    "authorId": "u23",
+    "videoUrl": "https://vjs.zencdn.net/v/oceans.mp4",
+    "poster": "https://picsum.photos/seed/reel17/540/960",
+    "caption": "This light though… with @alex.morgan. #goodvibes #mountains",
+    "audio": "Lo-fi Beats · Chill Hop",
+    "likes": 18869,
+    "commentsCount": 759,
+    "createdAt": "2025-12-19T09:38:00.000Z"
+  },
+  {
+    "id": "r19",
+    "authorId": "u30",
+    "videoUrl": "https://download.samplelib.com/mp4/sample-5s.mp4",
+    "poster": "https://picsum.photos/seed/reel18/540/960",
+    "caption": "Pages from my sketchbook. #travel #goodvibes #foodie",
+    "audio": "Summer Nights · Indie Mix",
+    "likes": 49431,
+    "commentsCount": 274,
+    "createdAt": "2025-12-30T03:35:00.000Z"
+  },
+  {
+    "id": "r20",
+    "authorId": "u17",
+    "videoUrl": "https://download.samplelib.com/mp4/sample-10s.mp4",
+    "poster": "https://picsum.photos/seed/reel19/540/960",
+    "caption": "Pages from my sketchbook. #coffee #sunset",
+    "audio": "Synthwave Drive",
+    "likes": 20936,
+    "commentsCount": 829,
+    "createdAt": "2025-12-20T05:50:00.000Z"
+  }
+]
