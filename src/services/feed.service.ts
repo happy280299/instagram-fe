@@ -1,3 +1,4 @@
+import type { AxiosResponse } from "axios";
 import { client } from "@/lib/api";
 import type { ISODate, Paginated, PostWithAuthor } from "@/types";
 
@@ -36,7 +37,7 @@ export interface FeedPost extends PostWithAuthor {
   viewer: { liked: boolean; saved: boolean; followsAuthor: boolean };
 }
 
-function toFeedPost(p: BackendFeedPost): FeedPost {
+export function toFeedPost(p: BackendFeedPost): FeedPost {
   const authorId = String(p.author.id);
   return {
     id: String(p.id),
@@ -71,10 +72,13 @@ function toFeedPost(p: BackendFeedPost): FeedPost {
   };
 }
 
+/** Maps a page of feed-shaped posts (GET /api/feed, GET /api/posts/users/:id) to `Paginated`. */
+export function toFeedPage({ data, meta }: AxiosResponse<BackendFeedPost[]>): Paginated<FeedPost> {
+  const { nextCursor } = (meta ?? {}) as Partial<BackendFeedMeta>;
+  return { items: data.map(toFeedPost), nextCursor: nextCursor == null ? null : String(nextCursor) };
+}
+
 export const feedService = {
   list: (params: { cursor?: string | null; limit?: number }) =>
-    client.get<BackendFeedPost[]>("/api/feed", { params }).then(({ data, meta }): Paginated<FeedPost> => {
-      const { nextCursor } = (meta ?? {}) as Partial<BackendFeedMeta>;
-      return { items: data.map(toFeedPost), nextCursor: nextCursor == null ? null : String(nextCursor) };
-    }),
+    client.get<BackendFeedPost[]>("/api/feed", { params }).then(toFeedPage),
 };

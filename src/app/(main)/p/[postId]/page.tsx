@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { PostDetail } from "@/components/post/PostDetail";
 import { PostGrid } from "@/components/post/PostGrid";
+import { RemotePost } from "@/components/post/RemotePost";
 import { getMorePostsFrom, getPost } from "@/lib/data";
 
 type Params = { params: Promise<{ postId: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const post = getPost((await params).postId);
-  if (!post) return { title: "Post not found" };
+  // Backend posts load on the client, so the server has no details to show here.
+  if (!post) return { title: "Post" };
   const title = `${post.author.fullName} on Instaclone`;
   const description = `${post.likes.toLocaleString("en-US")} likes, ${post.commentsCount} comments — ${post.author.username}: “${post.caption.slice(0, 140)}”`;
   const image = post.media[0];
@@ -23,8 +24,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 }
 
 export default async function PostPage({ params }: Params) {
-  const post = getPost((await params).postId);
-  if (!post) notFound();
+  const { postId } = await params;
+  const post = getPost(postId);
+  if (!post) return <RemotePost postId={postId} />;
   const more = getMorePostsFrom(post.authorId, post.id);
 
   return (

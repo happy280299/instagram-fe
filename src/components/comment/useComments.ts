@@ -1,22 +1,25 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useMemo } from "react";
-import { useInfiniteList, type PageFetcher } from "@/hooks/useInfiniteList";
+import { prependToPages, removeFromPages, usePaginatedQuery } from "@/hooks/usePaginatedQuery";
 import { getErrorMessage } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import { commentService } from "@/services/comment.service";
+import { useAuthStore } from "@/store/auth";
 import { toast } from "@/store/ui";
 import type { CommentThread, CommentWithAuthor, ID } from "@/types";
 
 const PAGE_SIZE = 20;
 
-/** Paginated comments for a post plus local `add`/`remove` for the viewer's own comments. */
+/** Paginated comments for a post plus `add`/`remove` for the viewer's own comments. */
 export function useComments(postId: ID) {
-  const fetchPage = useCallback<PageFetcher<CommentThread>>(
-    ({ cursor, limit }) => commentService.list(postId, { cursor: cursor == null ? null : String(cursor), limit: Number(limit) }),
-    [postId],
-  );
-  const list = useInfiniteList<CommentThread>(fetchPage, { limit: PAGE_SIZE });
-  const { items, setItems } = list;
+  const queryClient = useQueryClient();
+  // Wait for the session so isMine is the viewer's.
+  const hydrated = useAuthStore((s) => s.hydrated);
+  const queryKey = queryKeys.comments(postId);
+  const list = usePaginatedQuery<CommentThread>(queryKey, (params) => commentService.list(postId, params), { limit: PAGE_SIZE, enabled: hydrated });
+  const { items } = list;
 
   // A comment added locally shows at the top, then comes back again on the last page.
   const threads = useMemo(() => {
@@ -25,25 +28,23 @@ export function useComments(postId: ID) {
   }, [items]);
 
   const add = useCallback(
-    (comment: CommentWithAuthor) => setItems((prev) => [{ ...comment, replies: [] }, ...prev]),
-    [setItems],
+    (comment: CommentWithAuthor) => prependToPages<CommentThread>(queryClient, queryKeys.comments(postId), { ...comment, replies: [] }),
+    [queryClient, postId],
   );
 
   const remove = useCallback(
     async (commentId: ID) => {
-      const index = items.findIndex((c) => c.id === commentId);
-      if (index === -1) return;
-      const removed = items[index];
-      setItems((prev) => prev.filter((c) => c.id !== commentId));
+      const key = queryKeys.comments(postId);
+      const previous = removeFromPages<CommentThread>(queryClient, key, commentId);
       try {
         await commentService.remove(commentId);
         toast("Comment deleted");
       } catch (err) {
-        setItems((prev) => [...prev.slice(0, index), removed, ...prev.slice(index)]);
+        queryClient.setQueryData(key, previous);
         toast(getErrorMessage(err, "Couldn't delete comment. Try again."));
       }
     },
-    [items, setItems],
+    [queryClient, postId],
   );
 
   return { ...list, items: threads, add, remove };

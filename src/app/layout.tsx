@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { AppProviders } from "@/components/layout/AppProviders";
+import { QueryProvider } from "@/components/layout/QueryProvider";
 import { UI_STORAGE_KEY } from "@/lib/constants";
 import "./globals.css";
 
@@ -29,8 +30,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>
-        {children}
-        <AppProviders />
+        <QueryProvider>
+          {children}
+          <AppProviders />
+        </QueryProvider>
       </body>
     </html>
   );

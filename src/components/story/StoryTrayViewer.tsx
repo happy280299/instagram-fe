@@ -1,8 +1,10 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { queryKeys } from "@/lib/query-keys";
 import { storyService } from "@/services/story.service";
 import { useAuthStore } from "@/store/auth";
 import type { ID, StorySlide, StoryTrayItem, UserStories } from "@/types";
@@ -72,6 +74,7 @@ export function StoryTrayViewer({ tray, startIndex, onClose, onUserSeen }: Story
 /** Reports each newly shown slide to the backend; guests can't mark stories as seen. */
 function useMarkSeen(onUserSeen: (userId: ID) => void) {
   const isLoggedIn = useAuthStore((s) => s.accessToken !== null);
+  const queryClient = useQueryClient();
   const seen = useRef(new Set<ID>());
 
   return useCallback(
@@ -80,12 +83,20 @@ function useMarkSeen(onUserSeen: (userId: ID) => void) {
       seen.current.add(slide.id);
       storyService.markSeen(slide.id).then(
         () => {
+          queryClient.setQueryData<UserStories>(queryKeys.userStories(story.userId), (cached) => cached && withSlideSeen(cached, slide.id));
           if (story.slides.every((s) => s.isSeen || seen.current.has(s.id))) onUserSeen(story.userId);
         },
         // Not something the user asked for, so no toast; the ring simply stays unseen and it's retried next time.
         () => seen.current.delete(slide.id),
       );
     },
-    [isLoggedIn, onUserSeen],
+    [isLoggedIn, onUserSeen, queryClient],
   );
+}
+
+/** Cached stories after a slide was seen, so reopening them starts at the next unseen one. */
+function withSlideSeen(story: UserStories, slideId: ID): UserStories {
+  const slides = story.slides.map((s) => (s.id === slideId ? { ...s, isSeen: true } : s));
+  const firstUnseen = slides.findIndex((s) => !s.isSeen);
+  return { ...story, slides, startIndex: firstUnseen === -1 ? 0 : firstUnseen };
 }

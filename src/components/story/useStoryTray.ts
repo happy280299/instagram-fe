@@ -1,51 +1,33 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { getErrorMessage } from "@/lib/api";
+import { queryKeys } from "@/lib/query-keys";
 import { storyService } from "@/services/story.service";
 import { useAuthStore } from "@/store/auth";
 import type { ID, StoryTrayItem } from "@/types";
 
-interface TrayResult {
-  key: string;
-  items: StoryTrayItem[] | null;
-  error: string | null;
-}
-
-/** The story bar's users. Refetches when the viewer logs in or out, since the tray depends on who follows whom. */
+/** The story bar's users. Logging in or out resets the cache, since the tray depends on who follows whom. */
 export function useStoryTray() {
   // Wait for the persisted session so the request carries the Bearer token.
   const hydrated = useAuthStore((s) => s.hydrated);
-  const viewerId = useAuthStore((s) => s.user?.id ?? "guest");
-  const [attempt, setAttempt] = useState(0);
-  const [result, setResult] = useState<TrayResult | null>(null);
-  const key = `${viewerId}:${attempt}`;
+  const queryClient = useQueryClient();
+  const query = useQuery({ queryKey: queryKeys.storyTray, queryFn: storyService.tray, enabled: hydrated });
 
-  useEffect(() => {
-    if (!hydrated) return;
-    let cancelled = false;
-    storyService.tray().then(
-      (items) => !cancelled && setResult({ key, items, error: null }),
-      (err: unknown) => !cancelled && setResult({ key, items: null, error: getErrorMessage(err, "Couldn't load stories.") }),
-    );
-    return () => {
-      cancelled = true;
-    };
-  }, [hydrated, key]);
-
-  const current = result?.key === key ? result : null;
-
-  const markUserSeen = useCallback((userId: ID) => {
-    setResult((r) =>
-      r?.items ? { ...r, items: r.items.map((i) => (i.user.id === userId ? { ...i, hasUnseen: false } : i)) } : r,
-    );
-  }, []);
+  const markUserSeen = useCallback(
+    (userId: ID) =>
+      queryClient.setQueryData<StoryTrayItem[]>(queryKeys.storyTray, (items) =>
+        items?.map((i) => (i.user.id === userId ? { ...i, hasUnseen: false } : i)),
+      ),
+    [queryClient],
+  );
 
   return {
-    items: current?.items ?? null,
-    error: current?.error ?? null,
-    loading: current === null,
-    retry: () => setAttempt((a) => a + 1),
+    items: query.data ?? null,
+    error: query.isError && !query.isFetching ? getErrorMessage(query.error, "Couldn't load stories.") : null,
+    loading: !query.data && (query.isPending || query.isFetching),
+    retry: () => void query.refetch(),
     markUserSeen,
   };
 }

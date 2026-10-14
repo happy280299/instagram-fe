@@ -4,6 +4,7 @@ import { setApiToken, setUnauthorizedHandler } from "@/lib/api";
 import { authService } from "@/services/auth.service";
 import { userService } from "@/services/user.service";
 import { AUTH_STORAGE_KEY } from "@/lib/constants";
+import { resetServerState } from "@/lib/query-client";
 import type { ID, Session, User } from "@/types";
 import { toast } from "./ui";
 
@@ -38,11 +39,13 @@ export const useAuthStore = create<AuthState>()(
       login: ({ user, followingIds, accessToken = null }) => {
         setApiToken(accessToken);
         set({ user, accessToken, baselineFollowing: followingIds, following: Object.fromEntries(followingIds.map((id) => [id, true])) });
+        resetServerState();
         if (accessToken) void get().refreshMe();
       },
       logout: () => {
         setApiToken(null);
         set({ user: null, accessToken: null, baselineFollowing: [], following: {} });
+        resetServerState();
       },
       setUser: (user) => set({ user }),
       refreshMe: async () => {

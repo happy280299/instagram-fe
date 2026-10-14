@@ -1,15 +1,20 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 import { ActionMenu } from "@/components/ui/ActionMenu";
 import { IconButton } from "@/components/ui/IconButton";
 import { Modal } from "@/components/ui/Modal";
 import { Spinner } from "@/components/ui/Spinner";
+import { prependToPages } from "@/hooks/usePaginatedQuery";
+import { getErrorMessage } from "@/lib/api";
 import { postService } from "@/services/post.service";
+import { uploadService } from "@/services/upload.service";
 import { cn } from "@/lib/cn";
+import { queryKeys } from "@/lib/query-keys";
 import { loadImage, renderImage } from "@/lib/render-image";
-import { usePostStore } from "@/store/post";
+import { useAuthStore } from "@/store/auth";
 import { toast, useUIStore } from "@/store/ui";
 import { CaptionStep } from "./CaptionStep";
 import { CropStep } from "./CropStep";
@@ -23,7 +28,7 @@ const TITLES: Record<Step, string> = { select: "Create new post", crop: "Crop", 
 
 export function CreatePostModal() {
   const setOpen = useUIStore((s) => s.setCreateOpen);
-  const addCreated = usePostStore((s) => s.addCreated);
+  const queryClient = useQueryClient();
   const [step, setStep] = useState<Step>("select");
   const [draft, setDraft] = useState<Draft | null>(null);
   const [caption, setCaption] = useState("");
@@ -60,12 +65,19 @@ export function CreatePostModal() {
     setSharing(true);
     try {
       const image = await renderImage({ ...draft, aspect: ASPECTS[draft.aspect], filter: draft.filter.css });
-      const post = await postService.create({ caption, media: [{ ...image, alt: caption.slice(0, 100) || "Photo" }] });
-      addCreated(post);
+      const uploaded = await uploadService.image(image.blob, "post.jpg");
+      const post = await postService.create({ caption, media: [{ url: uploaded.url, width: uploaded.width, height: uploaded.height }] });
+      const username = post.author.username.toLowerCase();
+      prependToPages(queryClient, queryKeys.feed, post);
+      prependToPages(queryClient, queryKeys.userPosts(username), post);
+      queryClient.setQueryData(queryKeys.post(post.id), post);
+      // Post counts: the profile page's and the session's (/auth/me).
+      void queryClient.invalidateQueries({ queryKey: queryKeys.profile(username) });
+      void useAuthStore.getState().refreshMe();
       toast("Your post has been shared.");
       close();
-    } catch {
-      toast("Couldn't share your post. Try again.");
+    } catch (err) {
+      toast(getErrorMessage(err, "Couldn't share your post. Try again."));
       setSharing(false);
     }
   }

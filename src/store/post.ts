@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { postService } from "@/services/post.service";
 import { POSTS_STORAGE_KEY } from "@/lib/constants";
-import type { ID, PostWithAuthor } from "@/types";
+import type { ID } from "@/types";
 import { toast } from "./ui";
 
 interface PostState {
@@ -11,8 +11,6 @@ interface PostState {
   saved: ID[];
   likedComments: Record<ID, boolean>;
   seenStories: Record<ID, true>;
-  /** Posts created this session (shown at the top of the feed/profile). */
-  created: PostWithAuthor[];
   isLiked: (postId: ID) => boolean;
   isSaved: (postId: ID) => boolean;
   setLike: (postId: ID, liked: boolean) => Promise<void>;
@@ -20,7 +18,6 @@ interface PostState {
   toggleSave: (postId: ID) => Promise<void>;
   toggleCommentLike: (commentId: ID) => void;
   markStorySeen: (storyId: ID) => void;
-  addCreated: (post: PostWithAuthor) => void;
   /** Adopts the server's liked/saved flags for posts just loaded from the backend. */
   syncViewerState: (posts: { id: ID; liked: boolean; saved: boolean }[]) => void;
 }
@@ -32,7 +29,6 @@ export const usePostStore = create<PostState>()(
       saved: [],
       likedComments: {},
       seenStories: {},
-      created: [],
       isLiked: (postId) => get().liked[postId] === true,
       isSaved: (postId) => get().saved.includes(postId),
       setLike: async (postId, liked) => {
@@ -62,7 +58,6 @@ export const usePostStore = create<PostState>()(
       toggleCommentLike: (commentId) =>
         set((s) => ({ likedComments: { ...s.likedComments, [commentId]: !s.likedComments[commentId] } })),
       markStorySeen: (storyId) => set((s) => (s.seenStories[storyId] ? s : { seenStories: { ...s.seenStories, [storyId]: true } })),
-      addCreated: (post) => set((s) => ({ created: [post, ...s.created] })),
       syncViewerState: (posts) =>
         set((s) => {
           const savedNow = new Set(posts.filter((p) => p.saved).map((p) => p.id));

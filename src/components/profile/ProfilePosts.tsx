@@ -3,13 +3,11 @@
 import { Camera, SquareUser } from "lucide-react";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useInfiniteList } from "@/hooks/useInfiniteList";
-import { usePostStore } from "@/store/post";
 import type { Paginated, PostWithAuthor } from "@/types";
 import { GridSkeleton, PostGrid } from "@/components/post/PostGrid";
 
 interface ProfilePostsProps {
   username: string;
-  userId: string;
   tab: "posts" | "tagged";
   initial: Paginated<PostWithAuthor>;
 }
@@ -19,11 +17,9 @@ const EMPTY = {
   tagged: { icon: SquareUser, title: "No photos", description: "When people tag this account in photos, they'll appear here." },
 };
 
-export function ProfilePosts({ username, userId, tab, initial }: ProfilePostsProps) {
+export function ProfilePosts({ username, tab, initial }: ProfilePostsProps) {
   const { items, loading, sentinelRef } = useInfiniteList<PostWithAuthor>(`/api/users/${username}/posts`, { initial, params: { tab } });
-  const created = usePostStore((s) => s.created);
-  const mine = tab === "posts" ? created.filter((p) => p.authorId === userId && !items.some((i) => i.id === p.id)) : [];
-  const posts = [...mine, ...items];
+  const posts = items;
 
   if (posts.length === 0 && !loading) {
     const empty = EMPTY[tab];

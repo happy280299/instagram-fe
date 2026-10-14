@@ -76,12 +76,20 @@ Current domain folders:
 
 | Kind of state                                   | Where it lives                            |
 | ----------------------------------------------- | ----------------------------------------- |
-| Server data for one screen (lists, details)     | Hook local state (`useInfiniteList`, …)   |
+| Backend data (lists, details)                   | TanStack Query cache (`useQuery`, `usePaginatedQuery`) |
+| Mock data (screens not migrated yet)            | Hook local state (`useInfiniteList`)      |
 | Viewer state shared across screens (session, liked, saved, following) | Zustand store            |
 | Transient UI (open menu, input text)            | Component `useState`                      |
 | Shareable UI (selected tab, filters)            | URL (route or search params)              |
 
 Do not copy server data into a store "just in case". Select narrow slices from stores: `useStore((s) => s.x)`.
+
+TanStack Query:
+
+- Keys come from `queryKeys` in `src/lib/query-keys.ts`; add new ones there, never inline arrays.
+- Queries for viewer-dependent data use `enabled: hydrated` so the first request carries the token.
+- Login and logout call `resetServerState()`; keys don't include the viewer.
+- After a mutation, update the affected caches (`setQueryData`, `prependToPages`, `removeFromPages`) or invalidate them. Don't keep a parallel list in a store.
 
 ## Backend integration
 

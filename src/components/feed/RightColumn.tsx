@@ -2,13 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { userService } from "@/services/user.service";
 import { useAuthStore } from "@/store/auth";
-import type { UserSummary } from "@/types";
-import { SuggestionItem } from "./SuggestionItem";
 
 function RowSkeleton() {
   return (
@@ -26,18 +22,6 @@ export function RightColumn() {
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const router = useRouter();
-  const [suggestions, setSuggestions] = useState<UserSummary[] | null>(null);
-
-  useEffect(() => {
-    if (!user) return;
-    let cancelled = false;
-    userService.suggested(5)
-      .then((list) => !cancelled && setSuggestions(list))
-      .catch(() => !cancelled && setSuggestions([]));
-    return () => {
-      cancelled = true;
-    };
-  }, [user]);
 
   return (
     <div className="sticky top-0 pt-9 pl-16">
@@ -65,27 +49,6 @@ export function RightColumn() {
         </div>
       ) : (
         <RowSkeleton />
-      )}
-      <div className="mt-4 mb-2 flex items-center justify-between">
-        <h2 className="text-muted text-sm font-semibold">Suggested for you</h2>
-        <Link href="/explore" className="text-xs font-semibold hover:opacity-60">
-          See all
-        </Link>
-      </div>
-      {suggestions === null ? (
-        <div role="status" aria-label="Loading suggestions">
-          {Array.from({ length: 5 }, (_, i) => (
-            <RowSkeleton key={i} />
-          ))}
-        </div>
-      ) : suggestions.length === 0 ? (
-        <p className="text-muted py-2 text-sm">No suggestions right now.</p>
-      ) : (
-        <ul>
-          {suggestions.map((s) => (
-            <SuggestionItem key={s.id} user={s} />
-          ))}
-        </ul>
       )}
       <p className="text-muted mt-8 text-xs leading-5">
         About · Help · Privacy · Terms · Language

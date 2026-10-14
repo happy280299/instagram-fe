@@ -15,12 +15,19 @@ const TABS: { id: ProfileTab; label: string; icon: LucideIcon; suffix: string }[
   { id: "tagged", label: "Tagged", icon: SquareUser, suffix: "/tagged" },
 ];
 
-export function ProfileTabs({ username, userId }: { username: string; userId: string }) {
+interface ProfileTabsProps {
+  username: string;
+  userId: string;
+  /** Limits the tabs shown; all by default. */
+  tabs?: ProfileTab[];
+}
+
+export function ProfileTabs({ username, userId, tabs }: ProfileTabsProps) {
   const pathname = usePathname();
   const hydrated = useHydrated();
   const isMe = useAuthStore((s) => s.user?.id === userId);
   const base = `/${username}`;
-  const visible = TABS.filter((t) => t.id !== "saved" || (hydrated && isMe));
+  const visible = TABS.filter((t) => (!tabs || tabs.includes(t.id)) && (t.id !== "saved" || (hydrated && isMe)));
 
   return (
     <nav aria-label="Profile sections" className="border-separator border-t">

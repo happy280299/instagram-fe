@@ -8,7 +8,7 @@ interface RenderOptions {
   outputWidth?: number;
 }
 
-/** Crops, zooms, pans and filters an image on a canvas; returns a JPEG data URL. */
+/** Crops, zooms, pans and filters an image on a canvas; returns it as a JPEG blob. */
 export async function renderImage({ src, aspect, zoom, offsetX, offsetY, filter, outputWidth = 1080 }: RenderOptions) {
   const img = await loadImage(src);
   const width = outputWidth;
@@ -24,7 +24,9 @@ export async function renderImage({ src, aspect, zoom, offsetX, offsetY, filter,
   const drawH = img.naturalHeight * scale;
   ctx.filter = filter === "none" ? "none" : filter;
   ctx.drawImage(img, (width - drawW) / 2 + offsetX * width, (height - drawH) / 2 + offsetY * height, drawW, drawH);
-  return { url: canvas.toDataURL("image/jpeg", 0.85), width, height };
+  const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/jpeg", 0.85));
+  if (!blob) throw new Error("Could not export image");
+  return { blob, width, height };
 }
 
 export function loadImage(src: string): Promise<HTMLImageElement> {

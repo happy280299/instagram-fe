@@ -2,6 +2,7 @@
 
 import { MessageCircle } from "lucide-react";
 import type { ReactNode, Ref } from "react";
+import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
 import type { CommentThread } from "@/types";
 import { CommentItem, type ReplyTarget } from "./CommentItem";
@@ -10,6 +11,8 @@ interface CommentListProps {
   threads: CommentThread[];
   loading: boolean;
   done: boolean;
+  error?: string | null;
+  onRetry?: () => void;
   sentinelRef: Ref<HTMLDivElement>;
   onReply: (target: ReplyTarget) => void;
   onDelete?: (commentId: string) => void;
@@ -29,7 +32,7 @@ function CommentSkeleton() {
   );
 }
 
-export function CommentList({ threads, loading, done, sentinelRef, onReply, onDelete, lead }: CommentListProps) {
+export function CommentList({ threads, loading, done, error, onRetry, sentinelRef, onReply, onDelete, lead }: CommentListProps) {
   return (
     <div aria-busy={loading}>
       <ul aria-label="Comments">
@@ -43,6 +46,16 @@ export function CommentList({ threads, loading, done, sentinelRef, onReply, onDe
           {Array.from({ length: threads.length === 0 ? 4 : 2 }, (_, i) => (
             <CommentSkeleton key={i} />
           ))}
+        </div>
+      )}
+      {error && (
+        <div role="alert" className="flex flex-col items-center gap-2 py-6 text-center">
+          <p className="text-muted text-sm">Couldn&apos;t load {threads.length === 0 ? "comments" : "more comments"}.</p>
+          {onRetry && (
+            <Button size="sm" variant="secondary" onClick={onRetry}>
+              Try again
+            </Button>
+          )}
         </div>
       )}
       {done && threads.length === 0 && (

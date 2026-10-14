@@ -2,6 +2,8 @@
 export const IMAGE_REMOTE_PATTERNS = [
   // Files uploaded to the backend are served from its /static route.
   { protocol: "http", hostname: "localhost" },
+  // Post uploads (POST /api/uploads stores them on Cloudinary).
+  { protocol: "https", hostname: "res.cloudinary.com" },
   { protocol: "https", hostname: "picsum.photos" },
   { protocol: "https", hostname: "fastly.picsum.photos" },
   { protocol: "https", hostname: "i.pravatar.cc" },

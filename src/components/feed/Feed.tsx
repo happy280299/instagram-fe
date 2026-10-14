@@ -4,7 +4,8 @@ import { Camera } from "lucide-react";
 import { useCallback } from "react";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { useInfiniteList, type PageFetcher } from "@/hooks/useInfiniteList";
+import { usePaginatedQuery } from "@/hooks/usePaginatedQuery";
+import { queryKeys } from "@/lib/query-keys";
 import { feedService, type FeedPost } from "@/services/feed.service";
 import { useAuthStore } from "@/store/auth";
 import { usePostStore } from "@/store/post";
@@ -17,20 +18,17 @@ const PAGE_SIZE = 5;
 export function Feed() {
   // Wait for the persisted session so the first request carries the Bearer token.
   const hydrated = useAuthStore((s) => s.hydrated);
-  const fetchPage = useCallback<PageFetcher<FeedPost>>(async ({ cursor, limit }) => {
-    const page = await feedService.list({ cursor: cursor == null ? null : String(cursor), limit: Number(limit) });
+  const fetchPage = useCallback(async (params: { cursor: string | null; limit: number }) => {
+    const page = await feedService.list(params);
     usePostStore.getState().syncViewerState(page.items.map((p) => ({ id: p.id, ...p.viewer })));
     useAuthStore.getState().syncFollowing(page.items.filter((p) => p.viewer.followsAuthor).map((p) => p.authorId));
     return page;
   }, []);
-  const { items, loading, error, done, sentinelRef, loadMore } = useInfiniteList<FeedPost>(fetchPage, {
+  const { items: posts, loading, error, done, sentinelRef, loadMore } = usePaginatedQuery<FeedPost>(queryKeys.feed, fetchPage, {
     limit: PAGE_SIZE,
     enabled: hydrated,
   });
-  const created = usePostStore((s) => s.created);
   const setCreateOpen = useUIStore((s) => s.setCreateOpen);
-  const createdIds = new Set(created.map((p) => p.id));
-  const posts = [...created, ...items.filter((p) => !createdIds.has(p.id))];
 
   if (posts.length === 0 && done) {
     return (
@@ -48,7 +46,7 @@ export function Feed() {
       {posts.map((post, i) => (
         <PostCard key={post.id} post={post} priority={i === 0} />
       ))}
-      {(loading || !hydrated) && <FeedSkeleton count={posts.length === 0 ? 2 : 1} />}
+      {loading && <FeedSkeleton count={posts.length === 0 ? 2 : 1} />}
       {error && (
         <div className="flex flex-col items-center gap-2 py-6">
           <p className="text-muted text-sm">Couldn&apos;t load {posts.length === 0 ? "your feed" : "more posts"}.</p>

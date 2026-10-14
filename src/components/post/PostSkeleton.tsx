@@ -1,4 +1,5 @@
 import { Skeleton } from "@/components/ui/Skeleton";
+import { cn } from "@/lib/cn";
 
 export function PostSkeleton() {
   return (
@@ -25,6 +26,20 @@ export function FeedSkeleton({ count = 2 }: { count?: number }) {
       {Array.from({ length: count }, (_, i) => (
         <PostSkeleton key={i} />
       ))}
+    </div>
+  );
+}
+
+/** Two-pane placeholder for the post detail page and modal. */
+export function PostDetailSkeleton({ className }: { className?: string }) {
+  return (
+    <div role="status" aria-label="Loading post" className={cn("flex flex-col md:flex-row", className)}>
+      <Skeleton rounded="none" className="aspect-square w-full md:h-full md:w-auto" />
+      <div className="flex flex-1 flex-col gap-3 p-4">
+        <Skeleton className="h-8 w-40" />
+        <Skeleton className="h-3 w-3/4" />
+        <Skeleton className="h-3 w-1/2" />
+      </div>
     </div>
   );
 }

@@ -33,6 +33,8 @@ function CommentsBody({ postId }: { postId: ID }) {
           threads={comments.items}
           loading={comments.loading}
           done={comments.done}
+          error={comments.error}
+          onRetry={comments.loadMore}
           sentinelRef={comments.sentinelRef}
           onDelete={(id) => void comments.remove(id)}
           onReply={(target) => {

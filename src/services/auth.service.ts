@@ -2,8 +2,10 @@ import type { AxiosResponse } from "axios";
 import { client, withMessage, type ApiResult } from "@/lib/api";
 import type { AuthResponse, BackendProfile, BackendUser, LoginBody, RegisterBody, Session, UpdateProfileBody, User } from "@/types";
 
-/** Maps a backend user onto the app's User; counts are 0 until /auth/me provides them. */
-export function toUser(user: BackendUser | BackendProfile): User {
+type PublicFields<T> = Omit<T, "email" | "role">;
+
+/** Maps a backend user onto the app's User; counts are 0 unless the response includes them. */
+export function toUser(user: PublicFields<BackendUser> | PublicFields<BackendProfile>): User {
   const id = String(user.id);
   const counts = "postCount" in user ? user : null;
   return {
