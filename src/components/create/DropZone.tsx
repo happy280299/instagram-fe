@@ -4,8 +4,7 @@ import { ImagePlus } from "lucide-react";
 import { type DragEvent, useRef, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/cn";
-
-const MAX_BYTES = 10 * 1024 * 1024;
+import { imageFileError, isVideoFile, VIDEO_TYPES } from "@/lib/media-file";
 
 export function DropZone({ onFile, onError }: { onFile: (file: File) => void; onError: (message: string) => void }) {
   const [dragging, setDragging] = useState(false);
@@ -13,8 +12,9 @@ export function DropZone({ onFile, onError }: { onFile: (file: File) => void; on
 
   function accept(file: File | undefined) {
     if (!file) return;
-    if (!file.type.startsWith("image/")) return onError("Only image files are supported.");
-    if (file.size > MAX_BYTES) return onError("This file is too large (max 10 MB).");
+    // Videos are checked (size, length) once their metadata is read.
+    const error = isVideoFile(file) ? null : imageFileError(file);
+    if (error) return onError(error);
     onFile(file);
   }
 
@@ -39,9 +39,9 @@ export function DropZone({ onFile, onError }: { onFile: (file: File) => void; on
       <input
         ref={inputRef}
         type="file"
-        accept="image/*"
+        accept={["image/*", ...VIDEO_TYPES].join(",")}
         className="sr-only"
-        aria-label="Select a photo from your computer"
+        aria-label="Select a photo or video from your computer"
         onChange={(e) => accept(e.target.files?.[0])}
       />
       <Button data-autofocus onClick={() => inputRef.current?.click()}>

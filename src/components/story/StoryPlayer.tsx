@@ -1,7 +1,7 @@
 "use client";
 
 import { Pause, Play } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { TimeAgo } from "@/components/ui/TimeAgo";
 import type { StorySlide, StoryWithUser } from "@/types";
@@ -19,16 +19,22 @@ interface StoryPlayerProps {
   onPrevStory: () => void;
   /** Called once per slide as it comes on screen. Pass a stable callback. */
   onSlideShown?: (slide: StorySlide) => void;
+  /** Bottom bar for the current slide. `hold(true)` pauses playback and shortcuts while a dialog is open. */
+  renderFooter?: (slide: StorySlide, hold: (held: boolean) => void) => ReactNode;
 }
 
 /** Plays one user's slides. Re-mount (via `key`) per story so it starts from `startSlide`. */
-export function StoryPlayer({ story, startSlide = 0, onNextStory, onPrevStory, onSlideShown }: StoryPlayerProps) {
-  const [slideIdx, setSlideIdx] = useState(startSlide);
+export function StoryPlayer({ story, startSlide = 0, onNextStory, onPrevStory, onSlideShown, renderFooter }: StoryPlayerProps) {
+  const [currentIdx, setSlideIdx] = useState(startSlide);
   const [paused, setPaused] = useState(false);
+  const [held, setHeld] = useState(false);
   const [videoLength, setVideoLength] = useState<{ slideId: string; ms: number } | null>(null);
   const pressStart = useRef(0);
 
+  // Slides can be removed from under us (deleting your own story); stay in range.
+  const slideIdx = Math.min(currentIdx, story.slides.length - 1);
   const slide = story.slides[slideIdx];
+  const isPaused = paused || held;
   const duration = videoLength?.slideId === slide.id ? videoLength.ms : (slide.duration ?? DEFAULT_DURATION);
 
   useEffect(() => {
@@ -47,6 +53,7 @@ export function StoryPlayer({ story, startSlide = 0, onNextStory, onPrevStory, o
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
+      if (held) return;
       if (e.key === "ArrowRight") next();
       else if (e.key === "ArrowLeft") prev();
       else if (e.key === " ") {
@@ -56,7 +63,7 @@ export function StoryPlayer({ story, startSlide = 0, onNextStory, onPrevStory, o
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [next, prev]);
+  }, [next, prev, held]);
 
   return (
     <>
@@ -65,11 +72,11 @@ export function StoryPlayer({ story, startSlide = 0, onNextStory, onPrevStory, o
           key={slide.id}
           slide={slide}
           alt={`Story from ${story.user.username}`}
-          paused={paused}
+          paused={isPaused}
           onDuration={(ms) => setVideoLength({ slideId: slide.id, ms })}
         />
         <div className="absolute inset-x-0 top-0 z-10 flex flex-col gap-3 bg-linear-to-b from-black/60 to-transparent p-3">
-          <StoryProgress key={slide.id} count={story.slides.length} active={slideIdx} paused={paused} duration={duration} onComplete={next} />
+          <StoryProgress key={slide.id} count={story.slides.length} active={slideIdx} paused={isPaused} duration={duration} onComplete={next} />
           <div className="text-on-media flex items-center gap-2">
             <Avatar src={story.user.avatar} username={story.user.username} size="sm" />
             <span className="text-sm font-semibold">{story.user.username}</span>
@@ -97,6 +104,9 @@ export function StoryPlayer({ story, startSlide = 0, onNextStory, onPrevStory, o
           onPointerLeave={() => setPaused(false)}
           onContextMenu={(e) => e.preventDefault()}
         />
+        {renderFooter && (
+          <div className="absolute inset-x-0 bottom-0 z-10 bg-linear-to-t from-black/60 to-transparent p-3">{renderFooter(slide, setHeld)}</div>
+        )}
       </div>
       <StoryNavButtons onPrev={prev} onNext={next} />
     </>

@@ -13,6 +13,7 @@ import { postService } from "@/services/post.service";
 import { uploadService } from "@/services/upload.service";
 import { cn } from "@/lib/cn";
 import { queryKeys } from "@/lib/query-keys";
+import { isVideoFile, MAX_POST_VIDEO_SECONDS, openVideoFile } from "@/lib/media-file";
 import { loadImage, renderImage } from "@/lib/render-image";
 import { useAuthStore } from "@/store/auth";
 import { toast, useUIStore } from "@/store/ui";
@@ -20,10 +21,12 @@ import { CaptionStep } from "./CaptionStep";
 import { CropStep } from "./CropStep";
 import { DropZone } from "./DropZone";
 import { FilterStep } from "./FilterStep";
-import { ASPECTS, type Draft, FILTERS } from "./types";
+import { ASPECTS, type Draft, FILTERS, nearestAspect } from "./types";
 
 type Step = "select" | "crop" | "filter" | "caption";
 const ORDER: Step[] = ["select", "crop", "filter", "caption"];
+/** Videos are uploaded as-is, so they skip the canvas-only crop and filter steps. */
+const VIDEO_ORDER: Step[] = ["select", "caption"];
 const TITLES: Record<Step, string> = { select: "Create new post", crop: "Crop", filter: "Edit", caption: "Create new post" };
 
 export function CreatePostModal() {
@@ -46,9 +49,20 @@ export function CreatePostModal() {
     setStep("select");
   };
   const requestClose = () => (draft && !sharing ? setConfirmDiscard("close") : !sharing && close());
-  const go = (dir: 1 | -1) => setStep(ORDER[ORDER.indexOf(step) + dir]);
+  const order = draft?.video ? VIDEO_ORDER : ORDER;
+  const go = (dir: 1 | -1) => setStep(order[order.indexOf(step) + dir]);
 
   async function onFile(file: File) {
+    if (isVideoFile(file)) {
+      try {
+        const { src, width, height } = await openVideoFile(file, MAX_POST_VIDEO_SECONDS);
+        setDraft({ src, name: file.name, width, height, aspect: nearestAspect(width, height), zoom: 1, offsetX: 0, offsetY: 0, filter: FILTERS[0], video: file });
+        setStep("caption");
+      } catch (err) {
+        toast(getErrorMessage(err));
+      }
+      return;
+    }
     const src = URL.createObjectURL(file);
     try {
       const img = await loadImage(src);
@@ -64,8 +78,9 @@ export function CreatePostModal() {
     if (!draft) return;
     setSharing(true);
     try {
-      const image = await renderImage({ ...draft, aspect: ASPECTS[draft.aspect], filter: draft.filter.css });
-      const uploaded = await uploadService.image(image.blob, "post.jpg");
+      const uploaded = draft.video
+        ? await uploadService.media(draft.video, draft.name)
+        : await uploadService.media((await renderImage({ ...draft, aspect: ASPECTS[draft.aspect], filter: draft.filter.css })).blob, "post.jpg");
       const post = await postService.create({ caption, media: [{ url: uploaded.url, width: uploaded.width, height: uploaded.height }] });
       const username = post.author.username.toLowerCase();
       prependToPages(queryClient, queryKeys.feed, post);
@@ -95,7 +110,7 @@ export function CreatePostModal() {
       <header className="border-separator flex h-11 items-center border-b px-2">
         <span className="w-16">
           {step !== "select" && (
-            <IconButton label="Back" onClick={() => (step === "crop" ? setConfirmDiscard("back") : go(-1))} disabled={sharing}>
+            <IconButton label="Back" onClick={() => (step === order[1] ? setConfirmDiscard("back") : go(-1))} disabled={sharing}>
               <ArrowLeft aria-hidden className="size-6" />
             </IconButton>
           )}

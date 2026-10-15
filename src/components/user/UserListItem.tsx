@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { FollowButton } from "@/components/user/FollowButton";
 import { Avatar } from "@/components/ui/Avatar";
 import { VerifiedBadge } from "@/components/ui/VerifiedBadge";
 import type { UserSummary } from "@/types";
+import { FollowButton } from "./FollowButton";
 
-export function SuggestionItem({ user, subtitle = "Suggested for you" }: { user: UserSummary; subtitle?: string }) {
+/** A user row with avatar, username, a subtitle and a Follow button (hidden for the viewer). */
+export function UserListItem({ user, subtitle = user.fullName }: { user: UserSummary; subtitle?: string }) {
   return (
     <li className="flex items-center gap-3 py-2">
       <Link href={`/${user.username}`} tabIndex={-1} aria-hidden>

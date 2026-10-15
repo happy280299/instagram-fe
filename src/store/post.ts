@@ -1,7 +1,9 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
+import { getErrorMessage } from "@/lib/api";
 import { postService } from "@/services/post.service";
 import { POSTS_STORAGE_KEY } from "@/lib/constants";
+import { updateCachedPost } from "@/lib/post-cache";
 import type { ID } from "@/types";
 import { toast } from "./ui";
 
@@ -35,10 +37,12 @@ export const usePostStore = create<PostState>()(
         if (get().isLiked(postId) === liked) return;
         set((s) => ({ liked: { ...s.liked, [postId]: liked } }));
         try {
-          await postService.setLiked(postId, liked);
-        } catch {
+          const { isLiked, likeCount } = await postService.setLiked(postId, liked);
+          // Cached counts exclude the viewer's own like (PostActions adds it); this also picks up others' likes since load.
+          updateCachedPost(postId, (post) => ({ ...post, likes: Math.max(likeCount - (isLiked ? 1 : 0), 0) }));
+        } catch (err) {
           set((s) => ({ liked: { ...s.liked, [postId]: !liked } }));
-          toast("Couldn't update like. Try again.");
+          toast(getErrorMessage(err, "Couldn't update like. Try again."));
         }
       },
       toggleLike: (postId) => get().setLike(postId, !get().isLiked(postId)),

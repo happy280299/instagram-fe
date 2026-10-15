@@ -17,7 +17,7 @@ export interface BackendFeedPost {
     isFollowing: boolean;
     isMe: boolean;
   };
-  media: { id: number; url: string; type: "IMAGE" | "VIDEO"; width: number | null; height: number | null }[];
+  media: { id: number; url: string; type: "IMAGE" | "VIDEO"; width: number | null; height: number | null; thumbnailUrl: string | null }[];
   likeCount: number;
   commentCount: number;
   isLiked: boolean;
@@ -54,7 +54,9 @@ export function toFeedPost(p: BackendFeedPost): FeedPost {
       url: m.url,
       width: m.width ?? 1080,
       height: m.height ?? 1080,
-      alt: `Photo by ${p.author.username}`,
+      alt: `${m.type === "VIDEO" ? "Video" : "Photo"} by ${p.author.username}`,
+      type: m.type === "VIDEO" ? "video" : "image",
+      poster: m.thumbnailUrl ?? undefined,
     })),
     caption: p.caption,
     location: p.location,

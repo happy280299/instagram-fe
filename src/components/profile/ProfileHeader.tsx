@@ -5,7 +5,7 @@ import type { User } from "@/types";
 import { ProfileActions } from "./ProfileActions";
 import { ProfileStats } from "./ProfileStats";
 
-export function ProfileHeader({ user }: { user: User }) {
+export function ProfileHeader({ user, canOpenLists = false }: { user: User; canOpenLists?: boolean }) {
   const bio = (
     <div className="text-sm">
       <p className="font-semibold">{user.fullName}</p>
@@ -42,12 +42,12 @@ export function ProfileHeader({ user }: { user: User }) {
             </h1>
             <ProfileActions user={user} />
           </div>
-          <ProfileStats user={user} className="hidden gap-10 text-base md:flex" />
+          <ProfileStats user={user} canOpenLists={canOpenLists} className="hidden gap-10 text-base md:flex" />
           <div className="hidden md:block">{bio}</div>
         </section>
       </div>
       <div className="mt-4 md:hidden">{bio}</div>
-      <ProfileStats user={user} className="border-separator mt-4 -mx-4 border-t py-3 text-center text-sm md:hidden" />
+      <ProfileStats user={user} canOpenLists={canOpenLists} className="border-separator mt-4 -mx-4 border-t py-3 text-center text-sm md:hidden" />
     </header>
   );
 }

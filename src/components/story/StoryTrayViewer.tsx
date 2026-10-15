@@ -4,10 +4,13 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useRef, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { getErrorMessage } from "@/lib/api";
 import { queryKeys } from "@/lib/query-keys";
 import { storyService } from "@/services/story.service";
 import { useAuthStore } from "@/store/auth";
+import { toast } from "@/store/ui";
 import type { ID, StorySlide, StoryTrayItem, UserStories } from "@/types";
+import { OwnStoryFooter } from "./OwnStoryFooter";
 import { STORY_FRAME_CLASS, StoryOverlay } from "./StoryOverlay";
 import { StoryNavButtons } from "./StoryNavButtons";
 import { StoryPlayer } from "./StoryPlayer";
@@ -38,11 +41,24 @@ export function StoryTrayViewer({ tray, startIndex, onClose, onUserSeen }: Story
   }, [userIdx]);
 
   const handleSlideShown = useCallback((slide: StorySlide) => data && markSeen(data, slide), [data, markSeen]);
+  const deleteSlide = useDeleteStory(data, next, onClose);
+  const renderFooter = useCallback(
+    (slide: StorySlide, hold: (held: boolean) => void) => <OwnStoryFooter slide={slide} hold={hold} onDelete={deleteSlide} />,
+    [deleteSlide],
+  );
 
   return (
     <StoryOverlay label={`Story by ${item.user.username}`} onClose={onClose}>
       {data ? (
-        <StoryPlayer key={data.id} story={data} startSlide={data.startIndex} onNextStory={next} onPrevStory={prev} onSlideShown={handleSlideShown} />
+        <StoryPlayer
+          key={data.id}
+          story={data}
+          startSlide={data.startIndex}
+          onNextStory={next}
+          onPrevStory={prev}
+          onSlideShown={handleSlideShown}
+          renderFooter={data.isMe ? renderFooter : undefined}
+        />
       ) : (
         <>
           <div className={STORY_FRAME_CLASS} aria-busy={!error}>
@@ -68,6 +84,36 @@ export function StoryTrayViewer({ tray, startIndex, onClose, onUserSeen }: Story
         </>
       )}
     </StoryOverlay>
+  );
+}
+
+/**
+ * Deletes one of your own slides, then moves on like Instagram: the next slide, the next user
+ * when it was your last one, or closes when it was your only story.
+ */
+function useDeleteStory(story: UserStories | null, next: () => void, close: () => void) {
+  const queryClient = useQueryClient();
+  return useCallback(
+    async (slide: StorySlide) => {
+      if (!story) return;
+      try {
+        await storyService.remove(slide.id);
+      } catch (err) {
+        toast(getErrorMessage(err, "Couldn't delete your story. Try again."));
+        return;
+      }
+      toast("Story deleted");
+      const remaining = story.slides.filter((s) => s.id !== slide.id);
+      queryClient.setQueryData<StoryTrayItem[]>(queryKeys.storyTray, (items) =>
+        remaining.length === 0
+          ? items?.filter((i) => i.user.id !== story.userId)
+          : items?.map((i) => (i.user.id === story.userId ? { ...i, storyCount: remaining.length } : i)),
+      );
+      if (remaining.length === 0) return close();
+      queryClient.setQueryData<UserStories>(queryKeys.userStories(story.userId), (cached) => cached && { ...cached, slides: remaining, startIndex: 0 });
+      if (story.slides.at(-1)?.id === slide.id) next();
+    },
+    [story, next, close, queryClient],
   );
 }
 

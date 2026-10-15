@@ -7,6 +7,7 @@ import { useDoubleTap } from "@/hooks/useDoubleTap";
 import { cn } from "@/lib/cn";
 import type { Media } from "@/types";
 import { HeartBurst } from "./HeartBurst";
+import { PostVideo } from "./PostVideo";
 
 interface PostMediaProps {
   media: Media[];
@@ -27,13 +28,22 @@ export function mediaRatio(media: Media[]): number {
 export function PostMedia({ media, onDoubleTap, priority, sizes = "(max-width: 767px) 100vw, 470px", className, fill }: PostMediaProps) {
   const [index, setIndex] = useState(0);
   const [burst, setBurst] = useState(0);
+  // Pause chosen by the viewer for the current slide's video; moving to another slide resets it.
+  const [videoPaused, setVideoPaused] = useState(false);
   const touchX = useRef<number | null>(null);
   const ratio = mediaRatio(media);
-  const go = (next: number) => setIndex(Math.min(Math.max(next, 0), media.length - 1));
-  const handleTap = useDoubleTap(() => {
-    setBurst((n) => n + 1);
-    onDoubleTap?.();
-  });
+  const go = (next: number) => {
+    setIndex(Math.min(Math.max(next, 0), media.length - 1));
+    setVideoPaused(false);
+  };
+  const isVideo = media[index]?.type === "video";
+  const handleTap = useDoubleTap(
+    () => {
+      setBurst((n) => n + 1);
+      onDoubleTap?.();
+    },
+    { onSingleTap: isVideo ? () => setVideoPaused((p) => !p) : undefined },
+  );
 
   return (
     <div
@@ -54,7 +64,17 @@ export function PostMedia({ media, onDoubleTap, priority, sizes = "(max-width: 7
       <div className="flex h-full transition-transform duration-300 ease-out" style={{ transform: `translateX(-${index * 100}%)` }}>
         {media.map((m, i) => (
           <div key={m.id} className="relative h-full w-full shrink-0" aria-hidden={i !== index}>
-            <SafeImage src={m.url} alt={m.alt} fill sizes={sizes} priority={priority && i === 0} className="object-cover" draggable={false} />
+            {m.type === "video" ? (
+              <PostVideo
+                media={m}
+                active={i === index}
+                paused={i === index && videoPaused}
+                onTogglePaused={() => setVideoPaused((p) => !p)}
+                sizes={sizes}
+              />
+            ) : (
+              <SafeImage src={m.url} alt={m.alt} fill sizes={sizes} priority={priority && i === 0} className="object-cover" draggable={false} />
+            )}
           </div>
         ))}
       </div>
@@ -81,7 +101,7 @@ function CarouselArrow({ side, onClick }: { side: "left" | "right"; onClick: () 
   return (
     <button
       type="button"
-      aria-label={side === "left" ? "Previous photo" : "Next photo"}
+      aria-label={side === "left" ? "Previous" : "Next"}
       onClick={(e) => {
         e.stopPropagation();
         onClick();

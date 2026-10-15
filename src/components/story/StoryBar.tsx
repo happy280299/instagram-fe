@@ -6,15 +6,20 @@ import { useRef, useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
+import { useAuthStore } from "@/store/auth";
 import { useStoryTray } from "./useStoryTray";
+import { YourStoryTile } from "./YourStoryTile";
 
 const StoryTrayViewer = dynamic(() => import("./StoryTrayViewer").then((m) => m.StoryTrayViewer), { ssr: false });
+const CreateStoryModal = dynamic(() => import("./CreateStoryModal").then((m) => m.CreateStoryModal), { ssr: false });
 
 const SKELETON_COUNT = 6;
 
 export function StoryBar() {
   const { items, error, loading, retry, markUserSeen } = useStoryTray();
+  const me = useAuthStore((s) => s.user);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [creating, setCreating] = useState(false);
   const scroller = useRef<HTMLUListElement>(null);
   const scrollBy = (dir: 1 | -1) => scroller.current?.scrollBy({ left: dir * 320, behavior: "smooth" });
 
@@ -29,14 +34,18 @@ export function StoryBar() {
       </div>
     );
   }
-  if (items.length === 0) {
+  const myIndex = items.findIndex((i) => i.isMe);
+  // Logged-in viewers always get their own tile, so only guests can see an empty bar.
+  if (items.length === 0 && !me) {
     return <p className="text-muted mb-2 px-3 py-4 text-sm md:mb-6 md:px-0">No stories right now. Follow people to see their stories here.</p>;
   }
 
   return (
     <div className="relative mb-2 md:mb-6">
       <ul ref={scroller} aria-label="Stories" className="scrollbar-none flex gap-3 overflow-x-auto scroll-smooth px-3 py-3 md:px-0">
+        {me && <YourStoryTile me={me} mine={items[myIndex] ?? null} onView={() => setOpenIndex(myIndex)} onAdd={() => setCreating(true)} />}
         {items.map((item, index) => {
+          if (item.isMe && me) return null;
           const label = item.isMe ? "Your story" : item.user.username;
           return (
             <li key={item.user.id} className="shrink-0">
@@ -69,6 +78,7 @@ export function StoryBar() {
       >
         <ChevronRight aria-hidden className="size-4 text-black" />
       </button>
+      {creating && <CreateStoryModal onClose={() => setCreating(false)} />}
       {openIndex !== null && (
         <StoryTrayViewer tray={items} startIndex={openIndex} onClose={() => setOpenIndex(null)} onUserSeen={markUserSeen} />
       )}

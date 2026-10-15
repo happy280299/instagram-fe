@@ -31,6 +31,10 @@ export interface Media {
   width: number;
   height: number;
   alt: string;
+  /** Defaults to "image". */
+  type?: "image" | "video";
+  /** Cover image of a video, for grids and the player's poster. */
+  poster?: string;
 }
 
 export interface Post {
@@ -83,6 +87,10 @@ export interface StorySlide {
   duration?: number;
   /** The viewer has already seen this slide (backend stories only). */
   isSeen?: boolean;
+  /** How many people have seen it; only sent to the story's author. */
+  viewCount?: number;
+  /** Cover image of a video slide. */
+  poster?: string;
 }
 
 export interface Story {

@@ -31,26 +31,14 @@ export interface Draft {
   offsetX: number;
   offsetY: number;
   filter: Filter;
+  /** Set for a video: uploaded as-is, so crop and filters don't apply. */
+  video?: File;
 }
 
-/** Max pan (as a fraction of frame size) so the image always covers the frame. */
-export function panLimits(draft: Draft): { x: number; y: number } {
-  const frame = ASPECTS[draft.aspect];
-  const image = draft.width / draft.height;
-  // Size of the object-cover'd image relative to the frame, before zoom.
-  const relW = image > frame ? image / frame : 1;
-  const relH = image > frame ? 1 : frame / image;
-  return {
-    x: Math.max((relW * draft.zoom - 1) / 2, 0),
-    y: Math.max((relH * draft.zoom - 1) / 2, 0),
-  };
-}
-
-export function clampPan(draft: Draft): Draft {
-  const { x, y } = panLimits(draft);
-  return {
-    ...draft,
-    offsetX: Math.min(Math.max(draft.offsetX, -x), x),
-    offsetY: Math.min(Math.max(draft.offsetY, -y), y),
-  };
+/** Frame closest to a video's shape, matching how the feed will show it (no taller than 4:5). */
+export function nearestAspect(width: number, height: number): AspectId {
+  const ratio = width / height;
+  if (ratio < 0.9) return "4:5";
+  if (ratio > 1.3) return "16:9";
+  return "1:1";
 }

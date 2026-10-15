@@ -25,7 +25,7 @@ export function RemoteProfile({ username, children }: { username: string; childr
   const user = profile.isMe && me ? me : profile.user;
   return (
     <div className="max-w-content mx-auto w-full pb-8 md:px-5">
-      <ProfileHeader user={user} />
+      <ProfileHeader user={user} canOpenLists />
       {/* Saved, reels and tagged have no backend endpoints yet. */}
       <ProfileTabs username={user.username} userId={user.id} tabs={["posts"]} />
       {children}

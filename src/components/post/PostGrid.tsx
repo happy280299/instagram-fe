@@ -1,6 +1,9 @@
 import { Skeleton } from "@/components/ui/Skeleton";
-import type { PostWithAuthor } from "@/types";
+import type { Media, PostWithAuthor } from "@/types";
 import { GridItem } from "./GridItem";
+
+/** A video tile shows its cover image; without one the tile falls back to SafeImage's placeholder. */
+const cover = (media: Media) => (media.type === "video" ? (media.poster ?? "") : media.url);
 
 export function PostGrid({ posts }: { posts: PostWithAuthor[] }) {
   return (
@@ -9,8 +12,9 @@ export function PostGrid({ posts }: { posts: PostWithAuthor[] }) {
         <li key={post.id}>
           <GridItem
             href={`/p/${post.id}`}
-            image={post.media[0].url}
+            image={cover(post.media[0])}
             alt={post.media[0].alt}
+            video={post.media[0].type === "video"}
             likes={post.likes}
             comments={post.commentsCount}
             multiple={post.media.length > 1}

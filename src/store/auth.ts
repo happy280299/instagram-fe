@@ -1,10 +1,11 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { setApiToken, setUnauthorizedHandler } from "@/lib/api";
+import { getErrorMessage, setApiToken, setUnauthorizedHandler } from "@/lib/api";
 import { authService } from "@/services/auth.service";
-import { userService } from "@/services/user.service";
+import { type Profile, userService } from "@/services/user.service";
 import { AUTH_STORAGE_KEY } from "@/lib/constants";
-import { resetServerState } from "@/lib/query-client";
+import { queryClient, resetServerState } from "@/lib/query-client";
+import { queryKeys } from "@/lib/query-keys";
 import type { ID, Session, User } from "@/types";
 import { toast } from "./ui";
 
@@ -66,10 +67,24 @@ export const useAuthStore = create<AuthState>()(
         const next = !get().isFollowing(userId);
         set((s) => ({ following: { ...s.following, [userId]: next } }));
         try {
-          await userService.setFollowing(username, next);
-        } catch {
+          const { isFollowing, followerCount } = await userService.setFollowing(username, next);
+          // The server count already includes this follow, so make it the new baseline (followerDelta → 0).
+          set((s) => ({
+            following: { ...s.following, [userId]: isFollowing },
+            baselineFollowing: isFollowing ? [...s.baselineFollowing.filter((id) => id !== userId), userId] : s.baselineFollowing.filter((id) => id !== userId),
+          }));
+          queryClient.setQueryData<Profile>(queryKeys.profile(username.toLowerCase()), (p) =>
+            p && { ...p, isFollowing, user: { ...p.user, followers: followerCount } },
+          );
+          // Lists that changed: their followers and the viewer's following. Marked stale only, so an open list doesn't reshuffle.
+          void queryClient.invalidateQueries({ queryKey: queryKeys.followers(username.toLowerCase()), refetchType: "none" });
+          const me = get().user;
+          if (me) void queryClient.invalidateQueries({ queryKey: queryKeys.following(me.username), refetchType: "none" });
+          // The viewer's own "following" count.
+          void get().refreshMe();
+        } catch (err) {
           set((s) => ({ following: { ...s.following, [userId]: !next } }));
-          toast(`Couldn't ${next ? "follow" : "unfollow"} ${username}. Try again.`);
+          toast(getErrorMessage(err, `Couldn't ${next ? "follow" : "unfollow"} ${username}. Try again.`));
         }
       },
       syncFollowing: (userIds) =>

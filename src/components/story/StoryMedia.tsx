@@ -30,6 +30,7 @@ export function StoryMedia({ slide, alt, paused, onDuration }: StoryMediaProps) 
 
   return (
     <>
+      {slide.poster && <SafeImage src={slide.poster} alt="" fill sizes="(max-width: 767px) 100vw, 540px" className="object-cover" />}
       <video
         ref={videoRef}
         src={slide.url}

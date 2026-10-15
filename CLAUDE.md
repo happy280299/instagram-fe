@@ -45,7 +45,7 @@ A change is done only when all of these hold:
 **Group by what a component is about, not by the page that first used it.** A comment component lives in `comment/` even though the feed shows comments.
 
 - A domain folder holds only that domain: `comment/` contains the comment list, item, composer, modal and `useComments`, and nothing about posts or stories.
-- A page folder holds only what that page alone uses. `feed/` is the home feed (`Feed`, `RightColumn`, `SuggestionItem`), not every component the feed renders.
+- A page folder holds only what that page alone uses. `feed/` is the home feed (`Feed`, `RightColumn`), not every component the feed renders.
 - **When a component is needed by a second page or domain, move it to its domain folder** (create one if needed) instead of importing it from another page's folder. Example: `FollowButton` started in `profile/` and moved to `user/` once the feed and reels used it.
 - Hooks and types used by one domain sit in that domain folder (`comment/useComments.ts`). Shared across domains, they go to `hooks/` or `types/`.
 - A file goes in a domain folder named after it: a `Comment*` component in `comment/`, a `Post*` component in `post/`.
@@ -60,7 +60,7 @@ Current domain folders:
 | `post/`         | Post card, header, media, actions, caption, menu, detail, modal, grid, skeletons |
 | `comment/`      | Comment list, item, composer, caption-as-comment, comments modal, `useComments` |
 | `story/`        | Story bar, viewer, progress                                               |
-| `user/`         | User-level actions shared by pages (`FollowButton`)                       |
+| `user/`         | User-level pieces shared by pages (`FollowButton`, `UserListItem`, `FollowListModal`) |
 | `share/`        | Share modal                                                               |
 | `notification/` | Notifications panel and item                                              |
 

@@ -1,6 +1,12 @@
 import type { AxiosResponse } from "axios";
 import { client, withMessage, type ApiResult } from "@/lib/api";
-import type { AuthResponse, BackendProfile, BackendUser, LoginBody, RegisterBody, Session, UpdateProfileBody, User } from "@/types";
+import type { AuthResponse, BackendProfile, BackendUser, ID, LoginBody, RegisterBody, Session, UpdateProfileBody, User } from "@/types";
+
+/** Shown when a user has no avatar; the backend stores "" for them. */
+export const placeholderAvatar = (userId: ID) => `https://i.pravatar.cc/300?u=${userId}`;
+
+/** Whether `user.avatar` is a real photo rather than the placeholder. */
+export const hasAvatar = (user: Pick<User, "id" | "avatar">) => user.avatar !== placeholderAvatar(user.id);
 
 type PublicFields<T> = Omit<T, "email" | "role">;
 
@@ -12,7 +18,7 @@ export function toUser(user: PublicFields<BackendUser> | PublicFields<BackendPro
     id,
     username: user.username,
     fullName: user.name,
-    avatar: user.avatarUrl || `https://i.pravatar.cc/300?u=${id}`,
+    avatar: user.avatarUrl || placeholderAvatar(id),
     bio: user.bio,
     website: null,
     isVerified: user.isVerified,
