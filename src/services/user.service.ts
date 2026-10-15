@@ -48,25 +48,44 @@ export interface FollowListUser extends UserSummary {
   isMe: boolean;
 }
 
-function toFollowListPage({ data, meta }: AxiosResponse<BackendListUser[]>): Paginated<FollowListUser> {
-  const { nextCursor } = (meta ?? {}) as { nextCursor?: number | null };
+function toListUser(u: BackendListUser): FollowListUser {
   return {
-    items: data.map((u) => ({
-      id: String(u.id),
-      username: u.username,
-      fullName: u.name,
-      avatar: u.avatarUrl || `https://i.pravatar.cc/150?u=${u.username}`,
-      isVerified: u.isVerified,
-      isFollowing: u.isFollowing,
-      isMe: u.isMe,
-    })),
-    nextCursor: nextCursor == null ? null : String(nextCursor),
+    id: String(u.id),
+    username: u.username,
+    fullName: u.name,
+    avatar: u.avatarUrl || `https://i.pravatar.cc/150?u=${u.username}`,
+    isVerified: u.isVerified,
+    isFollowing: u.isFollowing,
+    isMe: u.isMe,
   };
 }
 
+function toFollowListPage({ data, meta }: AxiosResponse<BackendListUser[]>): Paginated<FollowListUser> {
+  const { nextCursor } = (meta ?? {}) as { nextCursor?: number | null };
+  return { items: data.map(toListUser), nextCursor: nextCursor == null ? null : String(nextCursor) };
+}
+
+/** Item of GET /api/users/search. */
+interface BackendSearchUser extends BackendListUser {
+  followerCount: number;
+}
+
+/** A search result, with what the search panel shows under the name. */
+export interface SearchUser extends FollowListUser {
+  followerCount: number;
+}
+
+/** Longest query GET /api/users/search accepts. */
+export const SEARCH_MAX_LENGTH = 30;
+const SEARCH_LIMIT = 20;
+
 export const userService = {
   list: (limit: number) => http.get<UserSummary[]>("/api/users", { params: { limit } }),
-  search: (q: string) => http.get<UserSummary[]>("/api/search", { params: { q } }),
+  /** Top matches by username or name (accents ignored), people you follow first. No pagination. */
+  search: (q: string) =>
+    http
+      .get<BackendSearchUser[]>("/api/users/search", { params: { q, limit: SEARCH_LIMIT } })
+      .then((users) => users.map((u): SearchUser => ({ ...toListUser(u), followerCount: u.followerCount }))),
   setFollowing: (username: string, follow: boolean) => {
     const url = `/api/users/${encodeURIComponent(username)}/follow`;
     return (follow ? http.post<BackendFollowState>(url) : http.delete<BackendFollowState>(url)).then(toFollowState);

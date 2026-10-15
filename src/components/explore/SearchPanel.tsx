@@ -1,13 +1,22 @@
 "use client";
 
 import { Search, X } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { SlidePanel } from "@/components/ui/SlidePanel";
+import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { userService } from "@/services/user.service";
+import { compactNumber } from "@/lib/format";
+import { SEARCH_MAX_LENGTH, type SearchUser } from "@/services/user.service";
 import { useUIStore } from "@/store/ui";
-import type { UserSummary } from "@/types";
 import { SearchResultItem } from "./SearchResultItem";
+import { useUserSearch } from "./useUserSearch";
+
+/** Like Instagram: who you follow, otherwise how many followers. */
+function resultSubtitle(user: SearchUser): string {
+  if (user.isFollowing) return `${user.fullName} • Following`;
+  if (user.followerCount > 0) return `${user.fullName} • ${compactNumber(user.followerCount)} followers`;
+  return user.fullName;
+}
 
 export function SearchPanel() {
   const close = useUIStore((s) => s.closePanel);
@@ -16,25 +25,7 @@ export function SearchPanel() {
   const removeRecent = useUIStore((s) => s.removeRecentSearch);
   const clearRecent = useUIStore((s) => s.clearRecentSearches);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<{ q: string; users: UserSummary[] } | null>(null);
-  const q = query.trim();
-
-  // Debounced search; stale responses are ignored.
-  useEffect(() => {
-    if (!q) return;
-    let cancelled = false;
-    const id = setTimeout(() => {
-      userService.search(q)
-        .then((users) => !cancelled && setResults({ q, users }))
-        .catch(() => !cancelled && setResults({ q, users: [] }));
-    }, 250);
-    return () => {
-      cancelled = true;
-      clearTimeout(id);
-    };
-  }, [q]);
-
-  const loading = q !== "" && results?.q !== q;
+  const { q, users, loading, error, retry } = useUserSearch(query);
 
   return (
     <SlidePanel title="Search" onClose={close}>
@@ -42,7 +33,7 @@ export function SearchPanel() {
         <label className="bg-hover flex items-center gap-2 rounded-lg px-4 py-2">
           <Search aria-hidden className="text-muted size-4" />
           <span className="sr-only">Search users</span>
-          <input data-autofocus type="search" value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search" className="placeholder:text-muted flex-1 bg-transparent outline-none [&::-webkit-search-cancel-button]:hidden" />
+          <input data-autofocus type="search" value={query} onChange={(e) => setQuery(e.target.value)} maxLength={SEARCH_MAX_LENGTH + 1} placeholder="Search" className="placeholder:text-muted flex-1 bg-transparent outline-none [&::-webkit-search-cancel-button]:hidden" />
           {query && (
             <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="bg-muted text-background rounded-full p-0.5">
               <X aria-hidden className="size-3" />
@@ -78,13 +69,24 @@ export function SearchPanel() {
               </div>
             </div>
           ))}
-        {!loading && q && results && (
-          results.users.length === 0 ? (
+        {error && (
+          <div role="alert" className="flex flex-col items-center gap-2 py-16 text-center">
+            <p className="text-muted text-sm">{error}</p>
+            <Button size="sm" variant="secondary" onClick={retry}>
+              Try again
+            </Button>
+          </div>
+        )}
+        {users &&
+          (users.length === 0 ? (
             <p className="text-muted py-16 text-center text-sm">No results found.</p>
           ) : (
-            <ul>{results.users.map((u) => <SearchResultItem key={u.id} user={u} onSelect={addRecent} />)}</ul>
-          )
-        )}
+            <ul>
+              {users.map((u) => (
+                <SearchResultItem key={u.id} user={u} subtitle={resultSubtitle(u)} onSelect={addRecent} />
+              ))}
+            </ul>
+          ))}
       </div>
     </SlidePanel>
   );

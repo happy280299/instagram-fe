@@ -8,9 +8,11 @@ interface SearchResultItemProps {
   user: UserSummary;
   onSelect: (user: UserSummary) => void;
   onRemove?: (user: UserSummary) => void;
+  /** Defaults to the full name. */
+  subtitle?: string;
 }
 
-export function SearchResultItem({ user, onSelect, onRemove }: SearchResultItemProps) {
+export function SearchResultItem({ user, onSelect, onRemove, subtitle = user.fullName }: SearchResultItemProps) {
   return (
     <li className="hover:bg-hover flex items-center">
       <Link href={`/${user.username}`} onClick={() => onSelect(user)} className="flex min-w-0 flex-1 items-center gap-3 px-6 py-2">
@@ -20,7 +22,7 @@ export function SearchResultItem({ user, onSelect, onRemove }: SearchResultItemP
             <span className="truncate">{user.username}</span>
             {user.isVerified && <VerifiedBadge />}
           </span>
-          <span className="text-muted block truncate text-sm">{user.fullName}</span>
+          <span className="text-muted block truncate text-sm">{subtitle}</span>
         </span>
       </Link>
       {onRemove && (
