@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { cn } from "@/lib/cn";
+import { SIDEBAR_LABEL } from "./nav";
 import { useAuthStore } from "@/store/auth";
 
 export function ProfileNavLink({ showLabel, compact }: { showLabel: boolean; compact?: boolean }) {
@@ -27,7 +28,7 @@ export function ProfileNavLink({ showLabel, compact }: { showLabel: boolean; com
         size="xs"
         className={cn("rounded-full", active && "outline-foreground outline-2 outline-offset-1")}
       />
-      <span className={cn(active && "font-bold", showLabel ? "sr-only xl:not-sr-only" : "sr-only")}>Profile</span>
+      <span className={cn(active && "font-bold", showLabel ? SIDEBAR_LABEL : "sr-only")}>Profile</span>
     </Link>
   );
 }

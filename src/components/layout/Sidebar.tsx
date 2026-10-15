@@ -1,49 +1,47 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { LogoMark, Wordmark } from "@/components/ui/Logo";
 import { cn } from "@/lib/cn";
 import { useUIStore } from "@/store/ui";
 import { MoreMenu } from "./MoreMenu";
 import { NavButton } from "./NavButton";
-import { isCompactRoute, SIDEBAR_NAV } from "./nav";
+import { SIDEBAR_NAV } from "./nav";
 import { ProfileNavLink } from "./ProfileNavLink";
 
 /**
- * ≥1264px: full sidebar with labels (collapses while a panel is open).
- * 768–1263px: icon-only rail. <768px: hidden (TopBar + BottomNav instead).
+ * ≥768px: an icon-only rail that expands over the page (icons + labels) on hover or keyboard focus,
+ * except while a panel is open. <768px: hidden (TopBar + BottomNav instead).
  */
 export function Sidebar() {
-  const panelOpen = useUIStore((s) => s.panel !== null);
-  const pathname = usePathname();
-  // Like Instagram, the inbox always uses the compact rail.
-  const expanded = !panelOpen && !isCompactRoute(pathname);
+  // An open panel docks beside the rail; expanding would cover it.
+  const expandable = useUIStore((s) => s.panel === null);
 
   return (
     <nav
       aria-label="Primary"
       className={cn(
-        "bg-background border-separator fixed inset-y-0 left-0 z-40 hidden flex-col border-r px-3 pt-2 pb-5 transition-[width] duration-200 md:flex",
+        "group/sidebar bg-background border-separator fixed inset-y-0 left-0 z-40 hidden flex-col overflow-x-hidden border-r px-3 pt-2 pb-5 transition-[width,box-shadow] duration-200 md:flex",
         "w-(--container-sidebar-collapsed)",
-        expanded && "xl:w-(--container-sidebar)",
+        // Overlays the page instead of pushing it, so hovering doesn't reflow the content.
+        expandable && "hover:w-(--container-sidebar) hover:shadow-xl has-[:focus-visible]:w-(--container-sidebar) has-[:focus-visible]:shadow-xl",
       )}
     >
       <Link href="/" aria-label="Instaclone home" className="mb-5 flex h-[73px] items-center px-3 pt-6 pb-4">
-        <LogoMark className={cn("size-6", expanded && "xl:hidden")} />
-        <Wordmark className={cn("hidden", expanded && "xl:block")} />
+        <LogoMark className={cn("size-6 shrink-0", expandable && "group-hover/sidebar:hidden group-has-[:focus-visible]/sidebar:hidden")} />
+        <Wordmark className={cn("hidden", expandable && "group-hover/sidebar:block group-has-[:focus-visible]/sidebar:block")} />
       </Link>
       <ul className="flex flex-1 flex-col">
         {SIDEBAR_NAV.map((entry) => (
           <li key={entry.id}>
-            <NavButton entry={entry} showLabel={expanded} />
+            <NavButton entry={entry} showLabel={expandable} />
           </li>
         ))}
         <li>
-          <ProfileNavLink showLabel={expanded} />
+          <ProfileNavLink showLabel={expandable} />
         </li>
       </ul>
-      <MoreMenu showLabel={expanded} />
+      <MoreMenu showLabel={expandable} />
     </nav>
   );
 }

@@ -35,7 +35,8 @@ export function isActivePath(pathname: string, href: string): boolean {
   return href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
 }
 
-/** Routes that always use the icon-only sidebar, even at ≥1264px. */
-export function isCompactRoute(pathname: string): boolean {
-  return isActivePath(pathname, "/direct");
-}
+/**
+ * Label of a sidebar item: hidden while the rail is collapsed, shown when the sidebar expands
+ * (hovered, or keyboard focus inside it). Relies on the `group/sidebar` class on the <nav>.
+ */
+export const SIDEBAR_LABEL = "sr-only whitespace-nowrap group-hover/sidebar:not-sr-only group-has-[:focus-visible]/sidebar:not-sr-only";

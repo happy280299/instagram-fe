@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { useUIStore } from "@/store/ui";
-import { isActivePath, type NavEntry } from "./nav";
+import { isActivePath, type NavEntry, SIDEBAR_LABEL } from "./nav";
 
 interface NavButtonProps {
   entry: NavEntry;
-  /** Show the text label at ≥1264px (full sidebar). */
+  /** Show the text label when the sidebar expands (see SIDEBAR_LABEL). */
   showLabel: boolean;
   compact?: boolean;
 }
@@ -26,7 +26,7 @@ export function NavButton({ entry, showLabel, compact }: NavButtonProps) {
   const content = (
     <>
       <Icon aria-hidden className={cn("size-6 shrink-0 transition-transform group-hover:scale-105")} strokeWidth={active ? 2.75 : 2} />
-      <span className={cn("truncate", active && "font-bold", showLabel ? "sr-only xl:not-sr-only" : "sr-only")}>{label}</span>
+      <span className={cn("truncate", active && "font-bold", showLabel ? SIDEBAR_LABEL : "sr-only")}>{label}</span>
     </>
   );
   const className = cn(
