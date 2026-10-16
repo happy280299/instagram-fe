@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { navBadge } from "./navBadge";
 import { LogoMark, Wordmark } from "@/components/ui/Logo";
 import { cn } from "@/lib/cn";
 import { useUIStore } from "@/store/ui";
@@ -34,7 +35,7 @@ export function Sidebar() {
       <ul className="flex flex-1 flex-col">
         {SIDEBAR_NAV.map((entry) => (
           <li key={entry.id}>
-            <NavButton entry={entry} showLabel={expandable} />
+            <NavButton entry={entry} showLabel={expandable} badge={navBadge(entry.id)} />
           </li>
         ))}
         <li>

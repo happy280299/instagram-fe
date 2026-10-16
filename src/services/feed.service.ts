@@ -24,6 +24,11 @@ export interface BackendFeedPost {
   isSaved: boolean;
   likedBy: { id: number; username: string; avatarUrl: string } | null;
   previewComments: { id: number; content: string; createdAt: ISODate; author: { id: number; username: string } }[];
+  /** Exactly one video: a Reel. */
+  isReel: boolean;
+  shareToFeed: boolean;
+  /** Reels only. */
+  viewCount: number | null;
 }
 
 export interface BackendFeedMeta {
@@ -70,6 +75,8 @@ export function toFeedPost(p: BackendFeedPost): FeedPost {
       text: c.content,
       author: { id: String(c.author.id), username: c.author.username },
     })),
+    isReel: p.isReel,
+    ...(p.viewCount != null ? { viewCount: p.viewCount } : {}),
     viewer: { liked: p.isLiked, saved: p.isSaved, followsAuthor: p.author.isFollowing },
   };
 }

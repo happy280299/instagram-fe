@@ -15,6 +15,7 @@ export function PostGrid({ posts }: { posts: PostWithAuthor[] }) {
             image={cover(post.media[0])}
             alt={post.media[0].alt}
             video={post.media[0].type === "video"}
+            views={post.isReel ? post.viewCount : undefined}
             likes={post.likes}
             comments={post.commentsCount}
             multiple={post.media.length > 1}

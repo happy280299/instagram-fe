@@ -26,6 +26,7 @@ export function toUser(user: PublicFields<BackendUser> | PublicFields<BackendPro
     following: counts?.followingCount ?? 0,
     postsCount: counts?.postCount ?? 0,
     highlights: [],
+    ...("showActivityStatus" in user && typeof user.showActivityStatus === "boolean" ? { showActivityStatus: user.showActivityStatus } : {}),
   };
 }
 

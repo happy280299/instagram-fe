@@ -20,6 +20,8 @@ export interface User {
   following: number;
   postsCount: number;
   highlights: Highlight[];
+  /** The viewer's own setting; absent on other people's profiles. */
+  showActivityStatus?: boolean;
 }
 
 /** Lightweight user shape for lists, headers and mentions. */
@@ -47,6 +49,10 @@ export interface Post {
   commentsCount: number;
   taggedUserIds: ID[];
   createdAt: ISODate;
+  /** A post with exactly one video (backend posts only); shows in the Reels tab. */
+  isReel?: boolean;
+  /** Reels only. */
+  viewCount?: number;
 }
 
 export interface PostWithAuthor extends Post {
@@ -179,6 +185,58 @@ export interface NotificationWithActor extends Notification {
   postThumb: string | null;
 }
 
+/** A direct message (backend chat). Text, media, or both. */
+export interface ChatMessage {
+  id: ID;
+  conversationId: ID;
+  sender: Pick<UserSummary, "id" | "username" | "avatar">;
+  text: string | null;
+  media: { url: string; type: "image" | "video"; width: number | null; height: number | null; poster?: string } | null;
+  createdAt: ISODate;
+  /** Local only: sent optimistically and not confirmed yet, or failed. */
+  status?: "sending" | "failed";
+}
+
+/** A 1-1 conversation as the inbox and the chat header show it. */
+export interface ChatConversation {
+  id: ID;
+  participant: UserSummary;
+  lastMessage: ChatMessage | null;
+  lastMessageAt: ISODate | null;
+  /** Messages from the other person the viewer hasn't read. */
+  unreadCount: number;
+  /** Last message id the other person has read, for "Seen". */
+  peerLastReadId: ID | null;
+  peerPresence: Presence;
+}
+
+/** Whether someone is in the app right now. `isOnline: null` means hidden (either side turned activity status off). */
+export interface Presence {
+  isOnline: boolean | null;
+  lastActiveAt: ISODate | null;
+}
+
+/** Kinds of backend activity (GET /api/notifications). */
+export type ActivityType = "like" | "comment" | "follow";
+
+export interface ActivityActor extends Pick<UserSummary, "id" | "username" | "avatar" | "isVerified"> {
+  /** Whether the viewer follows them back. */
+  isFollowing: boolean;
+}
+
+/** One row of the activity panel; the backend groups e.g. several likes on a post into one. */
+export interface Activity {
+  id: ID;
+  type: ActivityType;
+  createdAt: ISODate;
+  isRead: boolean;
+  /** Most recent first; at most a couple, see `actorCount` for the total. */
+  actors: ActivityActor[];
+  actorCount: number;
+  post: { id: ID; thumbnail: string | null } | null;
+  commentText: string | null;
+}
+
 export interface Paginated<T> {
   items: T[];
   nextCursor: string | null;
@@ -243,6 +301,8 @@ export interface BackendProfile extends BackendUser {
   postCount: number;
   followerCount: number;
   followingCount: number;
+  /** Only on the viewer's own profile (GET/PATCH /api/auth/me). */
+  showActivityStatus?: boolean;
 }
 
 /** Body of PATCH /api/auth/me; send only the fields that changed. "" clears bio/avatarUrl. */
@@ -251,6 +311,8 @@ export interface UpdateProfileBody {
   username?: string;
   bio?: string;
   avatarUrl?: string;
+  /** Off hides your activity status from others, and theirs from you. */
+  showActivityStatus?: boolean;
 }
 
 export interface LoginBody {

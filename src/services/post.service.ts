@@ -7,6 +7,8 @@ export interface CreatePostBody {
   caption: string;
   location?: string | null;
   media: { url: string; width?: number; height?: number }[];
+  /** Reels (one video) only: false keeps it out of the feed and the main profile grid. Defaults to true. */
+  shareToFeed?: boolean;
 }
 
 /** Response of POST/DELETE /api/posts/:id/like. */

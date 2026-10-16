@@ -9,6 +9,8 @@ import { useInView } from "./useInView";
 interface Options {
   limit: number;
   enabled?: boolean;
+  /** Overrides the app default (e.g. 0 to refetch every time the list is shown). */
+  staleTime?: number;
 }
 
 type Pages<T> = InfiniteData<Paginated<T>, string | null>;
@@ -20,7 +22,7 @@ type Pages<T> = InfiniteData<Paginated<T>, string | null>;
 export function usePaginatedQuery<T>(
   queryKey: QueryKey,
   fetchPage: (params: { cursor: string | null; limit: number }) => Promise<Paginated<T>>,
-  { limit, enabled = true }: Options,
+  { limit, enabled = true, staleTime }: Options,
 ) {
   const query = useInfiniteQuery({
     queryKey,
@@ -28,8 +30,9 @@ export function usePaginatedQuery<T>(
     initialPageParam: null as string | null,
     getNextPageParam: (last) => last.nextCursor,
     enabled,
+    staleTime,
   });
-  const { data, error, hasNextPage, isFetchingNextPage, isPending, isError, fetchNextPage, refetch } = query;
+  const { data, error, hasNextPage, isFetching, isFetchingNextPage, isPending, isError, fetchNextPage, refetch } = query;
   const items = useMemo(() => data?.pages.flatMap((p) => p.items) ?? [], [data]);
   const { ref: sentinelRef, inView } = useInView<HTMLDivElement>({ rootMargin: "600px" });
 
@@ -42,6 +45,8 @@ export function usePaginatedQuery<T>(
     /** No data yet (includes waiting for `enabled`). */
     initialLoading: isPending,
     loading: isPending || isFetchingNextPage,
+    /** Any request in flight, including a background refetch of cached pages. */
+    fetching: isFetching,
     error: isError ? getErrorMessage(error) : null,
     done: !isPending && !isError && !hasNextPage,
     sentinelRef,

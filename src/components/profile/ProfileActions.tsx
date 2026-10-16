@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { useHydrated } from "@/hooks/useHydrated";
@@ -9,6 +8,7 @@ import { toast } from "@/store/ui";
 import type { User } from "@/types";
 import { EditProfileModal } from "./EditProfileModal";
 import { FollowButton } from "@/components/user/FollowButton";
+import { MessageButton } from "@/components/user/MessageButton";
 
 export function ProfileActions({ user }: { user: User }) {
   const hydrated = useHydrated();
@@ -32,9 +32,7 @@ export function ProfileActions({ user }: { user: User }) {
   return (
     <div className="flex flex-wrap gap-2">
       <FollowButton user={user} />
-      <Link href="/direct" className="bg-hover hover:bg-separator inline-flex h-8 items-center rounded-lg px-4 text-sm font-semibold">
-        Message
-      </Link>
+      <MessageButton username={user.username} />
     </div>
   );
 }

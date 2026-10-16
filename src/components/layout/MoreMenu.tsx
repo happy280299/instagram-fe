@@ -9,6 +9,7 @@ import { cn } from "@/lib/cn";
 import { SIDEBAR_LABEL } from "./nav";
 import { useAuthStore } from "@/store/auth";
 import { toast } from "@/store/ui";
+import { ActivityStatusToggle } from "./ActivityStatusToggle";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 
 export function MoreMenu({ showLabel }: { showLabel: boolean }) {
@@ -36,6 +37,7 @@ export function MoreMenu({ showLabel }: { showLabel: boolean }) {
             </Link>
           )}
           <ThemeSwitcher />
+          <ActivityStatusToggle />
           <div className="bg-separator my-1 h-px" />
           <button
             type="button"

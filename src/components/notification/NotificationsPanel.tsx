@@ -1,31 +1,62 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { Heart } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { SlidePanel } from "@/components/ui/SlidePanel";
 import { Skeleton } from "@/components/ui/Skeleton";
-import { useInfiniteList } from "@/hooks/useInfiniteList";
+import { usePaginatedQuery } from "@/hooks/usePaginatedQuery";
+import { queryKeys } from "@/lib/query-keys";
+import { notificationService } from "@/services/notification.service";
+import { useAuthStore } from "@/store/auth";
 import { useUIStore } from "@/store/ui";
-import type { NotificationWithActor } from "@/types";
+import type { Activity } from "@/types";
 import { NotificationItem } from "./NotificationItem";
 
+const PAGE_SIZE = 20;
 const DAY = 86_400_000;
 
-function groupOf(n: NotificationWithActor, now: number) {
-  if (!n.read) return "New";
-  const age = now - Date.parse(n.createdAt);
+function groupOf(activity: Activity, now: number) {
+  const age = now - Date.parse(activity.createdAt);
   if (age < DAY) return "Today";
   if (age < 7 * DAY) return "This week";
   if (age < 30 * DAY) return "This month";
   return "Earlier";
 }
 
+/** Marks everything read once the list has loaded, keeping this view's "new" dots, and clears the heart's dot. */
+function useMarkReadOnOpen(loaded: boolean) {
+  const queryClient = useQueryClient();
+  const done = useRef(false);
+  useEffect(() => {
+    if (!loaded || done.current) return;
+    done.current = true;
+    notificationService.markAllRead().then(
+      () => {
+        queryClient.setQueryData(queryKeys.unreadNotifications, 0);
+      },
+      // Not something the user asked for; the dot stays and it's retried next time.
+      () => undefined,
+    );
+  }, [loaded, queryClient]);
+}
+
 export function NotificationsPanel() {
   const close = useUIStore((s) => s.closePanel);
-  const { items, loading, done, sentinelRef } = useInfiniteList<NotificationWithActor>("/api/notifications");
-  const now = Date.now();
+  const hydrated = useAuthStore((s) => s.hydrated);
+  const isLoggedIn = useAuthStore((s) => s.accessToken !== null);
+  // staleTime 0: every open shows what happened since; mark read only once that fresh list is in.
+  const { items, loading, fetching, initialLoading, error, done, sentinelRef, loadMore } = usePaginatedQuery<Activity>(
+    queryKeys.notifications,
+    notificationService.list,
+    { limit: PAGE_SIZE, enabled: hydrated && isLoggedIn, staleTime: 0 },
+  );
+  useMarkReadOnOpen(!initialLoading && !fetching && !error);
 
-  const groups = new Map<string, NotificationWithActor[]>();
+  const now = Date.now();
+  const groups = new Map<string, Activity[]>();
   for (const n of items) {
     const key = groupOf(n, now);
     groups.set(key, [...(groups.get(key) ?? []), n]);
@@ -39,7 +70,7 @@ export function NotificationsPanel() {
             <h3 className="px-6 py-2 font-bold">{title}</h3>
             <ul>
               {list.map((n) => (
-                <NotificationItem key={n.id} notification={n} />
+                <NotificationItem key={n.id} activity={n} />
               ))}
             </ul>
           </section>
@@ -55,7 +86,17 @@ export function NotificationsPanel() {
             ))}
           </div>
         )}
-        {done && items.length === 0 && <EmptyState icon={Heart} title="Activity on your posts" description="When someone likes or comments on one of your posts, you'll see it here." />}
+        {error && (
+          <div role="alert" className="flex flex-col items-center gap-2 py-10 text-center">
+            <p className="text-muted text-sm">Couldn&apos;t load {items.length === 0 ? "your activity" : "more activity"}.</p>
+            <Button size="sm" variant="secondary" onClick={loadMore}>
+              Try again
+            </Button>
+          </div>
+        )}
+        {done && items.length === 0 && (
+          <EmptyState icon={Heart} title="Activity on your posts" description="When someone likes or comments on one of your posts, you'll see it here." />
+        )}
         <div ref={sentinelRef} aria-hidden className="h-px" />
       </div>
     </SlidePanel>

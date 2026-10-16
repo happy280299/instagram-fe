@@ -1,18 +1,22 @@
 "use client";
 
 import { useEffect, useLayoutEffect, useState } from "react";
+import { useRealtimeChat } from "@/components/direct/useRealtimeChat";
+import { useRealtimeNotifications } from "@/components/notification/useRealtimeNotifications";
 import { Toaster } from "@/components/ui/Toaster";
 import { useAuthStore } from "@/store/auth";
 import { usePostStore } from "@/store/post";
 import { useUIStore } from "@/store/ui";
 
 /**
- * Rehydrates persisted stores after mount (avoids SSR/client mismatches) and
- * keeps <html data-theme> in sync with the theme preference + OS setting.
+ * Rehydrates persisted stores after mount (avoids SSR/client mismatches), keeps
+ * <html data-theme> in sync with the theme preference + OS setting, and runs the realtime socket.
  */
 export function AppProviders() {
   const theme = useUIStore((s) => s.theme);
   const [themeReady, setThemeReady] = useState(false);
+  useRealtimeNotifications();
+  useRealtimeChat();
 
   // Layout effect: runs before any passive effect in the tree, so no component
   // can write default state over persisted state before it has been read.

@@ -2,6 +2,7 @@
 
 import { MapPin } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
+import { Switch } from "@/components/ui/Switch";
 import { useAuthStore } from "@/store/auth";
 import { DraftPreview } from "./DraftPreview";
 import type { Draft } from "./types";
@@ -12,9 +13,12 @@ interface CaptionStepProps {
   draft: Draft;
   caption: string;
   onCaption: (caption: string) => void;
+  /** Reels only (a single video): also show it in the feed and the main profile grid. */
+  shareToFeed: boolean;
+  onShareToFeed: (value: boolean) => void;
 }
 
-export function CaptionStep({ draft, caption, onCaption }: CaptionStepProps) {
+export function CaptionStep({ draft, caption, onCaption, shareToFeed, onShareToFeed }: CaptionStepProps) {
   const user = useAuthStore((s) => s.user);
   return (
     <div className="flex w-full flex-col md:h-full md:flex-row">
@@ -44,6 +48,18 @@ export function CaptionStep({ draft, caption, onCaption }: CaptionStepProps) {
         <div className="border-separator text-muted flex items-center justify-between border-y px-4 py-3 text-sm">
           Add location <MapPin aria-hidden className="size-4" />
         </div>
+        {draft.video && (
+          // A single video becomes a reel; this decides whether it also shows in the feed.
+          <div className="border-separator flex items-center justify-between gap-3 border-b px-4 py-3">
+            <span className="min-w-0">
+              <span id="share-to-feed-label" className="block text-sm">
+                Also share to Feed
+              </span>
+              <span className="text-muted block text-xs">Reels always appear in the Reels tab and on your profile.</span>
+            </span>
+            <Switch checked={shareToFeed} onChange={onShareToFeed} labelledBy="share-to-feed-label" />
+          </div>
+        )}
       </div>
     </div>
   );

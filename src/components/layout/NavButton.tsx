@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { useUIStore } from "@/store/ui";
@@ -11,9 +12,11 @@ interface NavButtonProps {
   /** Show the text label when the sidebar expands (see SIDEBAR_LABEL). */
   showLabel: boolean;
   compact?: boolean;
+  /** Drawn over the icon's corner, e.g. the unread dot. */
+  badge?: ReactNode;
 }
 
-export function NavButton({ entry, showLabel, compact }: NavButtonProps) {
+export function NavButton({ entry, showLabel, compact, badge }: NavButtonProps) {
   const pathname = usePathname();
   const panel = useUIStore((s) => s.panel);
   const togglePanel = useUIStore((s) => s.togglePanel);
@@ -25,7 +28,10 @@ export function NavButton({ entry, showLabel, compact }: NavButtonProps) {
 
   const content = (
     <>
-      <Icon aria-hidden className={cn("size-6 shrink-0 transition-transform group-hover:scale-105")} strokeWidth={active ? 2.75 : 2} />
+      <span className="relative shrink-0">
+        <Icon aria-hidden className={cn("size-6 transition-transform group-hover:scale-105")} strokeWidth={active ? 2.75 : 2} />
+        {badge}
+      </span>
       <span className={cn("truncate", active && "font-bold", showLabel ? SIDEBAR_LABEL : "sr-only")}>{label}</span>
     </>
   );

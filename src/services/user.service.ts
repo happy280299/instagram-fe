@@ -100,6 +100,9 @@ export const userService = {
   /** People `username` follows, most recent first. */
   following: (username: string, params: { cursor?: string | null; limit?: number }) =>
     client.get<BackendListUser[]>(`/api/users/${encodeURIComponent(username)}/following`, { params }).then(toFollowListPage),
+  /** A user's reels, including ones not shared to the feed. */
+  reels: (username: string, params: { cursor?: string | null; limit?: number }) =>
+    client.get<BackendFeedPost[]>(`/api/users/${encodeURIComponent(username)}/reels`, { params }).then(toFeedPage),
   /** A user's posts, newest first. */
   posts: (username: string, params: { cursor?: string | null; limit?: number }) =>
     client.get<BackendFeedPost[]>(`/api/users/${encodeURIComponent(username)}/posts`, { params }).then(toFeedPage),

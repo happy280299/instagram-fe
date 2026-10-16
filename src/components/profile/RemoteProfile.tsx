@@ -26,8 +26,8 @@ export function RemoteProfile({ username, children }: { username: string; childr
   return (
     <div className="max-w-content mx-auto w-full pb-8 md:px-5">
       <ProfileHeader user={user} canOpenLists />
-      {/* Reels and tagged have no backend endpoints yet; Saved only shows on your own profile. */}
-      <ProfileTabs username={user.username} userId={user.id} tabs={["posts", "saved"]} />
+      {/* Tagged has no backend endpoint yet; Saved only shows on your own profile. */}
+      <ProfileTabs username={user.username} userId={user.id} tabs={["posts", "reels", "saved"]} />
       {children}
     </div>
   );

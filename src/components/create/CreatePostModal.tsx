@@ -35,6 +35,7 @@ export function CreatePostModal() {
   const [step, setStep] = useState<Step>("select");
   const [draft, setDraft] = useState<Draft | null>(null);
   const [caption, setCaption] = useState("");
+  const [shareToFeed, setShareToFeed] = useState(true);
   const [sharing, setSharing] = useState(false);
   const [confirmDiscard, setConfirmDiscard] = useState<"back" | "close" | null>(null);
 
@@ -46,6 +47,7 @@ export function CreatePostModal() {
     if (draft?.src) URL.revokeObjectURL(draft.src);
     setDraft(null);
     setCaption("");
+    setShareToFeed(true);
     setStep("select");
   };
   const requestClose = () => (draft && !sharing ? setConfirmDiscard("close") : !sharing && close());
@@ -81,15 +83,24 @@ export function CreatePostModal() {
       const uploaded = draft.video
         ? await uploadService.media(draft.video, draft.name)
         : await uploadService.media((await renderImage({ ...draft, aspect: ASPECTS[draft.aspect], filter: draft.filter.css })).blob, "post.jpg");
-      const post = await postService.create({ caption, media: [{ url: uploaded.url, width: uploaded.width, height: uploaded.height }] });
+      const post = await postService.create({
+        caption,
+        media: [{ url: uploaded.url, width: uploaded.width, height: uploaded.height }],
+        // Only meaningful for a reel (a single video); the backend decides what's a reel.
+        ...(draft.video ? { shareToFeed } : {}),
+      });
       const username = post.author.username.toLowerCase();
-      prependToPages(queryClient, queryKeys.feed, post);
-      prependToPages(queryClient, queryKeys.userPosts(username), post);
+      const inFeed = !post.isReel || shareToFeed;
+      if (inFeed) {
+        prependToPages(queryClient, queryKeys.feed, post);
+        prependToPages(queryClient, queryKeys.userPosts(username), post);
+      }
+      if (post.isReel) prependToPages(queryClient, queryKeys.userReels(username), post);
       queryClient.setQueryData(queryKeys.post(post.id), post);
       // Post counts: the profile page's and the session's (/auth/me).
       void queryClient.invalidateQueries({ queryKey: queryKeys.profile(username) });
       void useAuthStore.getState().refreshMe();
-      toast("Your post has been shared.");
+      toast(post.isReel ? "Your reel has been shared." : "Your post has been shared.");
       close();
     } catch (err) {
       toast(getErrorMessage(err, "Couldn't share your post. Try again."));
@@ -130,7 +141,9 @@ export function CreatePostModal() {
         {step === "select" && <DropZone onFile={(f) => void onFile(f)} onError={toast} />}
         {draft && step === "crop" && <CropStep draft={draft} onChange={setDraft} />}
         {draft && step === "filter" && <FilterStep draft={draft} onChange={setDraft} />}
-        {draft && step === "caption" && <CaptionStep draft={draft} caption={caption} onCaption={setCaption} />}
+        {draft && step === "caption" && (
+          <CaptionStep draft={draft} caption={caption} onCaption={setCaption} shareToFeed={shareToFeed} onShareToFeed={setShareToFeed} />
+        )}
       </div>
       <ActionMenu
         open={confirmDiscard !== null}

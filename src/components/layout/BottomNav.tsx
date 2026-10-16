@@ -1,6 +1,7 @@
 "use client";
 
 import { NavButton } from "./NavButton";
+import { navBadge } from "./navBadge";
 import { BOTTOM_NAV } from "./nav";
 import { ProfileNavLink } from "./ProfileNavLink";
 
@@ -14,7 +15,7 @@ export function BottomNav() {
       <ul className="flex h-full items-center justify-around">
         {BOTTOM_NAV.map((entry) => (
           <li key={entry.id}>
-            <NavButton entry={entry} showLabel={false} compact />
+            <NavButton entry={entry} showLabel={false} compact badge={navBadge(entry.id)} />
           </li>
         ))}
         <li>

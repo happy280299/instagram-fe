@@ -13,6 +13,15 @@ export function timeAgoShort(iso: string, now: number = Date.now()): string {
   return `${Math.floor(diff / WEEK)}w`;
 }
 
+/** Chat activity status: "Active now", "Active 5m ago"; null when hidden or never seen online. */
+export function activityLabel(presence: { isOnline: boolean | null; lastActiveAt: string | null }, now: number = Date.now()): string | null {
+  if (presence.isOnline === null) return null;
+  if (presence.isOnline) return "Active now";
+  if (!presence.lastActiveAt) return null;
+  const ago = timeAgoShort(presence.lastActiveAt, now);
+  return ago === "now" ? "Active just now" : `Active ${ago} ago`;
+}
+
 /** Long relative time used under post details: "5 minutes ago", "2 days ago". */
 export function timeAgoLong(iso: string, now: number = Date.now()): string {
   const diff = Math.max(0, now - Date.parse(iso));

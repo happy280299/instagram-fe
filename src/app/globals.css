@@ -21,6 +21,7 @@
   --ic-blue-hover: #1877f2;
   --ic-red: #ff3040;
   --ic-error: #ed4956;
+  --ic-green: #1cd14f;
 
   /* Semantic, light */
   --ic-bg: var(--ic-white);
@@ -65,6 +66,8 @@
   --color-primary-hover: var(--ic-blue-hover);
   --color-like: var(--ic-red);
   --color-danger: var(--ic-error);
+  /* "Active now" dot in chat. Same in both themes, like Instagram. */
+  --color-online: var(--ic-green);
   --color-on-media: var(--ic-white);
 
   --color-story-1: #feda75;

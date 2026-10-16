@@ -1,102 +1,103 @@
 "use client";
 
-import { ArrowLeft, Info } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
-import { IconButton } from "@/components/ui/IconButton";
-import { Spinner } from "@/components/ui/Spinner";
-import { conversationService } from "@/services/conversation.service";
-import { useAuthStore } from "@/store/auth";
+import { Skeleton } from "@/components/ui/Skeleton";
+import { useNow } from "@/hooks/useNow";
+import { activityLabel } from "@/lib/format";
 import { useDirectStore } from "@/store/direct";
-import { toast } from "@/store/ui";
-import type { ConversationDetail, Message } from "@/types";
-import { MessageBubble } from "./MessageBubble";
 import { MessageComposer } from "./MessageComposer";
+import { MessageList } from "./MessageList";
+import { OnlineDot } from "./OnlineDot";
+import { useConversation } from "./useConversation";
+import { markConversationRead } from "./useRealtimeChat";
+import { useSendMessage } from "./useSendMessage";
 
-type LocalMessage = Message & { pending?: boolean; failed?: boolean };
-
+/** The open chat: header, messages and composer. Marks it read on open; the socket keeps it live. */
 export function ChatPane({ conversationId }: { conversationId: string }) {
-  const me = useAuthStore((s) => s.user);
-  const applyMessage = useDirectStore((s) => s.applyMessage);
-  const markRead = useDirectStore((s) => s.markRead);
-  const [convo, setConvo] = useState<ConversationDetail | null>(null);
-  const [messages, setMessages] = useState<LocalMessage[]>([]);
-  const [status, setStatus] = useState<"loading" | "ready" | "missing">("loading");
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const queryClient = useQueryClient();
+  const { conversation, error, notFound, retry } = useConversation(conversationId);
+  const setOpen = useDirectStore((s) => s.setOpenConversation);
+  const send = useSendMessage(conversationId);
+  const loaded = conversation !== null;
+  const now = useNow();
 
   useEffect(() => {
-    if (!me) return;
-    let cancelled = false;
-    conversationService.get(conversationId)
-      .then((c) => {
-        if (cancelled) return;
-        setConvo(c);
-        setMessages(c.messages);
-        setStatus("ready");
-        markRead(conversationId);
-      })
-      .catch(() => !cancelled && setStatus("missing"));
-    return () => {
-      cancelled = true;
-    };
-  }, [conversationId, me, markRead]);
+    setOpen(conversationId);
+    return () => setOpen(null);
+  }, [conversationId, setOpen]);
 
+  // Opening it reads it, so the other person sees "Seen"; new messages while open are read by the socket handler.
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ block: "end" });
-  }, [messages.length]);
+    if (loaded) markConversationRead(queryClient, conversationId);
+  }, [loaded, conversationId, queryClient]);
 
-  async function send(text: string) {
-    if (!me) return;
-    const temp: LocalMessage = { id: `tmp-${Date.now()}`, conversationId, senderId: me.id, text, createdAt: new Date().toISOString(), pending: true };
-    setMessages((m) => [...m, temp]);
-    applyMessage(temp);
-    try {
-      const saved = await conversationService.sendMessage(conversationId, text);
-      setMessages((m) => m.map((x) => (x.id === temp.id ? saved : x)));
-    } catch {
-      setMessages((m) => m.map((x) => (x.id === temp.id ? { ...x, pending: false, failed: true } : x)));
-      toast("Message failed to send");
-    }
-  }
-
-  if (status === "loading") return <div className="flex flex-1 items-center justify-center"><Spinner size="lg" /></div>;
-  if (status === "missing" || !convo) {
+  if (notFound) return <CenteredNotice title="Conversation not found" />;
+  if (error) {
     return (
-      <div className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
-        <p className="text-xl font-bold">Conversation not found</p>
-        <Link href="/direct"><Button variant="secondary">Back to inbox</Button></Link>
-      </div>
+      <CenteredNotice title="Couldn't load this conversation" detail={error}>
+        <Button onClick={retry}>Try again</Button>
+      </CenteredNotice>
     );
   }
+  if (!conversation) return <ChatSkeleton />;
 
-  const { participant } = convo;
+  const { participant } = conversation;
+  // Re-rendered every minute (useNow) so "Active 5m ago" keeps counting without a refetch.
+  const activity = activityLabel(conversation.peerPresence, now);
   return (
     <div className="flex min-w-0 flex-1 flex-col">
       <header className="border-separator flex items-center gap-3 border-b px-4 py-3">
-        <Link href="/direct" aria-label="Back to inbox" className="md:hidden"><ArrowLeft aria-hidden className="size-6" /></Link>
+        <Link href="/direct" aria-label="Back to inbox" className="md:hidden">
+          <ArrowLeft aria-hidden className="size-6" />
+        </Link>
         <Link href={`/${participant.username}`} className="flex min-w-0 flex-1 items-center gap-3">
-          <Avatar src={participant.avatar} username={participant.username} size="md" />
+          <span className="relative shrink-0">
+            <Avatar src={participant.avatar} username={participant.username} size="md" />
+            {conversation.peerPresence.isOnline && <OnlineDot />}
+          </span>
           <span className="min-w-0">
             <span className="block truncate font-semibold">{participant.fullName}</span>
-            <span className="text-muted block truncate text-xs">{participant.username}</span>
+            <span className="text-muted block truncate text-xs">{activity ?? participant.username}</span>
           </span>
         </Link>
-        <IconButton label="Conversation details" onClick={() => toast("Details aren't available in this demo")}><Info aria-hidden className="size-6" /></IconButton>
       </header>
-      <div className="flex flex-1 flex-col gap-1.5 overflow-y-auto px-4 py-4" role="log" aria-live="polite" aria-label={`Messages with ${participant.username}`}>
-        <div className="flex flex-col items-center gap-1 pb-8 text-center">
-          <Avatar src={participant.avatar} username={participant.username} size="xl" />
-          <p className="mt-2 text-xl font-semibold">{participant.fullName}</p>
-          <p className="text-muted text-sm">{participant.username} · Instaclone</p>
-        </div>
-        {messages.map((m) => (
-          <MessageBubble key={m.id} message={m} mine={m.senderId === me?.id} pending={m.pending} failed={m.failed} />
-        ))}
-        <div ref={bottomRef} />
+      <MessageList conversation={conversation} />
+      <MessageComposer conversationId={conversationId} onSend={(outgoing) => void send(outgoing)} />
+    </div>
+  );
+}
+
+function CenteredNotice({ title, detail, children }: { title: string; detail?: string; children?: ReactNode }) {
+  return (
+    <div role="alert" className="flex flex-1 flex-col items-center justify-center gap-3 p-6 text-center">
+      <p className="text-xl font-bold">{title}</p>
+      {detail && <p className="text-muted text-sm">{detail}</p>}
+      {children ?? (
+        <Link href="/direct" className="bg-hover hover:bg-separator inline-flex h-9 items-center rounded-lg px-4 font-semibold">
+          Back to inbox
+        </Link>
+      )}
+    </div>
+  );
+}
+
+function ChatSkeleton() {
+  return (
+    <div role="status" aria-label="Loading conversation" className="flex min-w-0 flex-1 flex-col">
+      <div className="border-separator flex items-center gap-3 border-b px-4 py-3">
+        <Skeleton rounded="full" className="size-avatar-md" />
+        <Skeleton className="h-3 w-32" />
       </div>
-      <MessageComposer onSend={(text) => void send(text)} />
+      <div className="flex flex-1 flex-col justify-end gap-2 p-4">
+        <Skeleton className="h-8 w-52 rounded-3xl" />
+        <Skeleton className="h-8 w-40 self-end rounded-3xl" />
+        <Skeleton className="h-8 w-48 rounded-3xl" />
+      </div>
     </div>
   );
 }

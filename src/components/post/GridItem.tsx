@@ -1,4 +1,4 @@
-import { Clapperboard, Heart, Layers, MessageCircle } from "lucide-react";
+import { Clapperboard, Heart, Layers, MessageCircle, Play } from "lucide-react";
 import Link from "next/link";
 import { SafeImage } from "@/components/ui/SafeImage";
 import { cn } from "@/lib/cn";
@@ -14,6 +14,8 @@ interface GridItemProps {
   comments: number;
   multiple?: boolean;
   video?: boolean;
+  /** Reels: play count shown on the tile, like Instagram. */
+  views?: number;
   /** "reel" = 9:16 tile, "fill" = stretch to the grid cell (explore's tall tile). */
   shape?: "square" | "reel" | "fill";
   className?: string;
@@ -22,7 +24,7 @@ interface GridItemProps {
 }
 
 /** Square tile with an Instagram-style hover overlay showing likes and comments. */
-export function GridItem({ href, image, alt, likes, comments, multiple, video, shape = "square", className, sizes = "(max-width: 767px) 33vw, 310px", priority }: GridItemProps) {
+export function GridItem({ href, image, alt, likes, comments, multiple, video, views, shape = "square", className, sizes = "(max-width: 767px) 33vw, 310px", priority }: GridItemProps) {
   return (
     <Link
       href={href}
@@ -33,6 +35,11 @@ export function GridItem({ href, image, alt, likes, comments, multiple, video, s
       {(multiple || video) && (
         <span aria-hidden className="text-on-media absolute top-2 right-2 drop-shadow">
           {video ? <Clapperboard className="size-5" /> : <Layers className="size-5" />}
+        </span>
+      )}
+      {views !== undefined && (
+        <span aria-label={`${compactNumber(views)} views`} className="text-on-media absolute bottom-2 left-2 flex items-center gap-1 text-sm font-semibold drop-shadow">
+          <Play aria-hidden className="fill-on-media size-4" /> {compactNumber(views)}
         </span>
       )}
       <span

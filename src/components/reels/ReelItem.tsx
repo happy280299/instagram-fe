@@ -3,22 +3,40 @@
 import { Music2, Play, Volume2, VolumeX } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { FollowButton } from "@/components/user/FollowButton";
 import { Avatar } from "@/components/ui/Avatar";
 import { RichText } from "@/components/ui/RichText";
 import { SafeImage } from "@/components/ui/SafeImage";
+import { FollowButton } from "@/components/user/FollowButton";
 import { useInView } from "@/hooks/useInView";
+import { reelService } from "@/services/reel.service";
+import type { FeedPost } from "@/services/feed.service";
 import { useUIStore } from "@/store/ui";
-import type { ReelWithAuthor } from "@/types";
 import { ReelActions } from "./ReelActions";
 
-export function ReelItem({ reel, priority }: { reel: ReelWithAuthor; priority?: boolean }) {
+/** Seconds of playback that count as a view, as the backend expects. */
+const VIEW_AFTER_S = 3;
+/** Reels already counted this session: one view per reel. */
+const counted = new Set<string>();
+
+interface ReelItemProps {
+  reel: FeedPost;
+  /** Load the video ahead (the one on screen and the next); others wait, to spare bandwidth. */
+  preload: boolean;
+  onVisible: () => void;
+}
+
+export function ReelItem({ reel, preload, onVisible }: ReelItemProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { ref, inView } = useInView<HTMLDivElement>({ threshold: 0.6 });
   const [userPaused, setUserPaused] = useState(false);
   const [failed, setFailed] = useState(false);
   const muted = useUIStore((s) => s.reelsMuted);
   const setMuted = useUIStore((s) => s.setReelsMuted);
+  const media = reel.media[0];
+
+  useEffect(() => {
+    if (inView) onVisible();
+  }, [inView, onVisible]);
 
   // Autoplay while ≥60% visible; pause (and rewind) when scrolled away.
   useEffect(() => {
@@ -32,20 +50,28 @@ export function ReelItem({ reel, priority }: { reel: ReelWithAuthor; priority?: 
     }
   }, [inView, userPaused]);
 
+  function countView(currentTime: number) {
+    if (currentTime < VIEW_AFTER_S || counted.has(reel.id)) return;
+    counted.add(reel.id);
+    // Best effort, like Instagram: a missed view isn't worth bothering the viewer.
+    reelService.recordView(reel.id).catch(() => counted.delete(reel.id));
+  }
+
+  if (!media) return null;
   return (
     <div ref={ref} className="flex h-full items-center justify-center gap-4 md:py-4">
       <div className="relative h-full w-full overflow-hidden bg-black md:aspect-[9/16] md:w-auto md:rounded-lg">
-        <SafeImage src={reel.poster} alt="" fill sizes="(max-width: 767px) 100vw, 400px" priority={priority} className="object-cover" />
+        {media.poster && <SafeImage src={media.poster} alt="" fill sizes="(max-width: 767px) 100vw, 400px" className="object-cover" />}
         <video
           ref={videoRef}
-          src={reel.videoUrl}
+          src={media.url}
           muted={muted}
           loop
           playsInline
-          preload={priority ? "auto" : "metadata"}
+          preload={preload ? "auto" : "none"}
           aria-label={`Reel by ${reel.author.username}`}
           onClick={() => setUserPaused((p) => !p)}
-          onEnded={() => setUserPaused(false)}
+          onTimeUpdate={(e) => countView(e.currentTarget.currentTime)}
           onError={() => setFailed(true)}
           className="absolute inset-0 h-full w-full cursor-pointer object-cover"
         />
@@ -78,11 +104,13 @@ export function ReelItem({ reel, priority }: { reel: ReelWithAuthor; priority?: 
             </Link>
             <FollowButton user={reel.author} variant="text" className="text-on-media! rounded-md border px-2 py-1" />
           </div>
-          <p className="pointer-events-auto line-clamp-2 text-sm [&_a]:text-on-media [&_a]:font-semibold">
-            <RichText text={reel.caption} />
-          </p>
+          {reel.caption && (
+            <p className="pointer-events-auto line-clamp-2 text-sm [&_a]:text-on-media [&_a]:font-semibold">
+              <RichText text={reel.caption} />
+            </p>
+          )}
           <p className="flex items-center gap-1.5 text-xs">
-            <Music2 aria-hidden className="size-3" /> {reel.author.username} · {reel.audio}
+            <Music2 aria-hidden className="size-3" /> {reel.author.username} · Original audio
           </p>
         </div>
         <div className="text-on-media absolute right-3 bottom-6 md:hidden">

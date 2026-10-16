@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Instagram-style web client. Next.js 15 (App Router), React 19, TypeScript (strict), Tailwind CSS v4, Zustand, axios. Package manager: pnpm. Node ≥ 20.
+Instagram-style web client. Next.js 15 (App Router), React 19, TypeScript (strict), Tailwind CSS v4, Zustand, TanStack Query, axios, socket.io-client. Package manager: **yarn** (v1, `yarn.lock`); don't use npm or pnpm, mixing them corrupts `node_modules`. Node ≥ 20.
 
 **Current state:** the app is moving from the in-repo mock API (`src/app/api/*`, `src/lib/data.ts`) to the real NestJS backend in `../shop-api`. Screens are migrated one at a time; anything not yet migrated still reads mock data.
 
@@ -8,16 +8,17 @@ Instagram-style web client. Next.js 15 (App Router), React 19, TypeScript (stric
 
 | Command          | Purpose                                  |
 | ---------------- | ---------------------------------------- |
-| `pnpm dev`       | Dev server                               |
-| `pnpm build`     | Production build                         |
-| `pnpm typecheck` | `tsc --noEmit`                           |
-| `pnpm lint`      | ESLint, fails on any warning             |
+| `yarn dev`       | Dev server                               |
+| `yarn build`     | Production build                         |
+| `yarn typecheck` | `tsc --noEmit`                           |
+| `yarn lint`      | ESLint, fails on any warning             |
+| `yarn add <pkg>` | Add a dependency (ask first, see below)  |
 
 ## Definition of done
 
 A change is done only when all of these hold:
 
-1. `pnpm typecheck && pnpm lint` pass with no errors or warnings.
+1. `yarn typecheck && yarn lint` pass with no errors or warnings.
 2. Every screen touched handles loading, error, empty and success states (see [UI states](#ui-states)).
 3. No new mock-only behaviour presented as real; gaps in the backend are reported, not papered over.
 4. The change is verified against the running backend when it touches the API, or the report says it wasn't.
@@ -60,7 +61,7 @@ Current domain folders:
 | `post/`         | Post card, header, media, actions, caption, menu, detail, modal, grid, skeletons |
 | `comment/`      | Comment list, item, composer, caption-as-comment, comments modal, `useComments` |
 | `story/`        | Story bar, viewer, progress                                               |
-| `user/`         | User-level pieces shared by pages (`FollowButton`, `UserListItem`, `FollowListModal`) |
+| `user/`         | User-level pieces shared by pages (`FollowButton`, `MessageButton`, `UserListItem`, `FollowListModal`) |
 | `share/`        | Share modal                                                               |
 | `notification/` | Notifications panel and item                                              |
 
