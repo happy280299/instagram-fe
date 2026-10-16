@@ -1,6 +1,6 @@
-import { http } from "@/lib/api";
+import { client, http } from "@/lib/api";
 import type { ID, PostWithAuthor } from "@/types";
-import { toFeedPost, type BackendFeedPost } from "./feed.service";
+import { toFeedPage, toFeedPost, type BackendFeedPost } from "./feed.service";
 
 /** Body of POST /api/posts. Media URLs must come from POST /api/uploads. */
 export interface CreatePostBody {
@@ -33,5 +33,11 @@ export const postService = {
     (liked ? http.post<BackendLikeState>(`/api/posts/${postId}/like`) : http.delete<BackendLikeState>(`/api/posts/${postId}/like`)).then(
       toLikeState,
     ),
-  setSaved: (postId: ID, saved: boolean) => http.post(`/api/posts/${postId}/save`, { saved }),
+  setSaved: (postId: ID, saved: boolean) =>
+    (saved ? http.post<{ isSaved: boolean }>(`/api/posts/${postId}/save`) : http.delete<{ isSaved: boolean }>(`/api/posts/${postId}/save`)).then(
+      (r) => r.isSaved,
+    ),
+  /** The viewer's saved posts, most recently saved first. Private to the viewer. */
+  saved: (params: { cursor?: string | null; limit?: number }) =>
+    client.get<BackendFeedPost[]>("/api/posts/saved", { params }).then(toFeedPage),
 };

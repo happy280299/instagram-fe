@@ -9,6 +9,8 @@ export const queryKeys = {
   /** Prefix of every user's posts list, for updates that touch all of them. */
   allUserPosts: ["user-posts"] as const,
   userPosts: (username: string) => ["user-posts", username] as const,
+  /** The viewer's saved posts; reset with the session like every key. */
+  savedPosts: ["saved-posts"] as const,
   followers: (username: string) => ["followers", username] as const,
   following: (username: string) => ["following", username] as const,
   userSearch: (q: string) => ["user-search", q] as const,

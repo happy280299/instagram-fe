@@ -4,6 +4,8 @@ import { getErrorMessage } from "@/lib/api";
 import { postService } from "@/services/post.service";
 import { POSTS_STORAGE_KEY } from "@/lib/constants";
 import { updateCachedPost } from "@/lib/post-cache";
+import { queryClient } from "@/lib/query-client";
+import { queryKeys } from "@/lib/query-keys";
 import type { ID } from "@/types";
 import { toast } from "./ui";
 
@@ -53,10 +55,12 @@ export const usePostStore = create<PostState>()(
         apply(next);
         try {
           await postService.setSaved(postId, next);
+          // The Saved grid filters unsaved posts out live; a newly saved one needs a refetch next time it opens.
+          void queryClient.invalidateQueries({ queryKey: queryKeys.savedPosts, refetchType: "none" });
           toast(next ? "Saved to your collection" : "Removed from saved");
-        } catch {
+        } catch (err) {
           apply(!next);
-          toast("Couldn't update saved posts. Try again.");
+          toast(getErrorMessage(err, "Couldn't update saved posts. Try again."));
         }
       },
       toggleCommentLike: (commentId) =>
