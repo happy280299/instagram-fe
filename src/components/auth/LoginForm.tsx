@@ -7,12 +7,11 @@ import { Button } from "@/components/ui/Button";
 import { Wordmark } from "@/components/ui/Logo";
 import { TextField } from "@/components/ui/TextField";
 import { getErrorMessage } from "@/lib/api";
-import { DEMO_EMAIL } from "@/lib/constants";
 import { authService } from "@/services/auth.service";
 import { useAuthStore } from "@/store/auth";
 import { toast } from "@/store/ui";
 import type { LoginBody } from "@/types";
-import { AuthCard, OrDivider } from "./AuthCard";
+import { AuthCard } from "./AuthCard";
 import { nextPath, useSessionRedirect } from "./useSessionRedirect";
 
 export function LoginForm() {
@@ -26,12 +25,10 @@ export function LoginForm() {
   const canSubmit = email.trim().length > 0 && password.length >= 6;
 
   async function signIn(credentials: LoginBody) {
-    console.log("credentials", credentials);
     setLoading(true);
     setError(null);
     try {
       const { session, message } = await authService.login(credentials);
-      console.log("session", session);
       login(session);
       toast(message ?? `Welcome back, ${session.user.username}!`);
       router.replace(nextPath());
@@ -80,17 +77,6 @@ export function LoginForm() {
             Log in
           </Button>
         </form>
-        <OrDivider />
-        <Button
-          variant="link"
-          fullWidth
-          onClick={() =>
-            void signIn({ email: DEMO_EMAIL, password: "password" })
-          }
-          disabled={loading}
-        >
-          Log in with the demo account
-        </Button>
         {error && (
           <p role="alert" className="text-danger mt-4 text-center text-sm">
             {error}
@@ -110,10 +96,6 @@ export function LoginForm() {
           Sign up
         </Link>
       </AuthCard>
-      <p className="text-muted mt-4 text-center text-xs">
-        Demo: any mock email (e.g. <code>{DEMO_EMAIL}</code>) and a 6+ character
-        password.
-      </p>
     </>
   );
 }

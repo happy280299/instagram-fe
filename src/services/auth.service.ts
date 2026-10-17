@@ -51,6 +51,11 @@ export const authService = {
   register: (body: RegisterBody) => client.post<AuthResponse>("/api/auth/register", body).then(toAuthResult),
   /** Trades a refresh token for a new pair (rotation: the old one is dead afterwards). */
   refresh: (refreshToken: string) => http.post<TokenPair>("/api/auth/refresh", { refreshToken }),
+  /**
+   * Changes the password. Every other device is logged out; this one gets a new token pair to store.
+   * A wrong current password is a 400 (not 401), so it never triggers a token refresh.
+   */
+  changePassword: (body: { currentPassword: string; newPassword: string }) => client.patch<TokenPair>("/api/auth/password", body).then(withMessage),
   /** Ends this device's session on the server. */
   logout: (refreshToken: string) => http.post("/api/auth/logout", { refreshToken }),
   me: () => client.get<BackendProfile>("/api/auth/me").then((r) => toUser(r.data)),

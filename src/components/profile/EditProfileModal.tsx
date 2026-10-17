@@ -10,6 +10,7 @@ import { getErrorMessage } from "@/lib/api";
 import { renderImage } from "@/lib/render-image";
 import { authService } from "@/services/auth.service";
 import { uploadService } from "@/services/upload.service";
+import { ChangePasswordModal } from "@/components/user/ChangePasswordModal";
 import { useAuthStore } from "@/store/auth";
 import { toast } from "@/store/ui";
 import type { UpdateProfileBody, User } from "@/types";
@@ -52,14 +53,19 @@ async function avatarUrlFor(change: AvatarChange): Promise<string | undefined> {
 }
 
 export function EditProfileModal({ user, open, onClose }: { user: User; open: boolean; onClose: () => void }) {
+  const [changingPassword, setChangingPassword] = useState(false);
   return (
-    <Modal open={open} onClose={onClose} title="Edit profile" className="md:max-w-md!">
-      {open && <EditProfileForm user={user} onDone={onClose} />}
-    </Modal>
+    <>
+      <Modal open={open} onClose={onClose} title="Edit profile" className="md:max-w-md!">
+        {open && <EditProfileForm user={user} onDone={onClose} onChangePassword={() => setChangingPassword(true)} />}
+      </Modal>
+      {/* Also reachable here because the sidebar's More menu doesn't exist on mobile. */}
+      {changingPassword && <ChangePasswordModal onClose={() => setChangingPassword(false)} />}
+    </>
   );
 }
 
-function EditProfileForm({ user, onDone }: { user: User; onDone: () => void }) {
+function EditProfileForm({ user, onDone, onChangePassword }: { user: User; onDone: () => void; onChangePassword: () => void }) {
   const router = useRouter();
   const setUser = useAuthStore((s) => s.setUser);
   const queryClient = useQueryClient();
@@ -147,6 +153,9 @@ function EditProfileForm({ user, onDone }: { user: User; onDone: () => void }) {
       )}
       <Button type="submit" loading={saving} fullWidth>
         Save
+      </Button>
+      <Button variant="ghost" onClick={onChangePassword} disabled={saving} fullWidth>
+        Change password
       </Button>
     </form>
   );

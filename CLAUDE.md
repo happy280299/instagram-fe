@@ -163,9 +163,10 @@ These are guides, not hard limits. Crossing one is a signal to split by responsi
 
 | Variable              | Required | Purpose                                      |
 | --------------------- | -------- | -------------------------------------------- |
-| `NEXT_PUBLIC_API_URL` | Yes      | Backend base URL, e.g. `http://localhost:3000` |
+| `NEXT_PUBLIC_API_URL` | Yes      | Backend origin **without** `/api` (services add it), e.g. `http://localhost:3000`. Socket.IO uses the same origin. |
+| `NEXT_PUBLIC_SITE_URL` | No      | This app's own URL for `metadataBase` (link previews), e.g. `http://localhost:3001`. Defaults to `http://localhost:3000`. |
 
-`.env*` files are git-ignored. When adding a variable, add it to this table and to `.env.example`.
+`.env*` files are git-ignored except `.env.example`. When adding a variable, add it to this table and to `.env.example`. `NEXT_PUBLIC_*` values are inlined at build time: rebuild/redeploy after changing them (Netlify: set them under Environment variables).
 
 ## Naming, formatting and comments
 
@@ -201,6 +202,5 @@ Not set up yet. Until they are, the rules above are enforced by review only:
 - **Git hooks:** husky + lint-staged running lint and format on staged files; commitlint for commit messages.
 - **Tests:** none exist. Planned: Vitest + Testing Library for service mappers, hooks and stores (`*.test.ts` next to the file); Playwright for login → feed → comment.
 - **CI:** typecheck, lint, test and build on every pull request.
-- **`.env.example`:** not committed yet.
 
 When one of these is added, move its rule into the relevant section above and delete it here.

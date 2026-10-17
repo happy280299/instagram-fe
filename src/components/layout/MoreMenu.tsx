@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, LogOut, Menu } from "lucide-react";
+import { Bookmark, KeyRound, LogOut, Menu } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -9,11 +9,13 @@ import { cn } from "@/lib/cn";
 import { SIDEBAR_LABEL } from "./nav";
 import { useAuthStore } from "@/store/auth";
 import { toast } from "@/store/ui";
+import { ChangePasswordModal } from "@/components/user/ChangePasswordModal";
 import { ActivityStatusToggle } from "./ActivityStatusToggle";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 
 export function MoreMenu({ showLabel }: { showLabel: boolean }) {
   const [open, setOpen] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
   const close = () => setOpen(false);
   const ref = useFocusTrap<HTMLDivElement>(open, close);
   const user = useAuthStore((s) => s.user);
@@ -38,6 +40,17 @@ export function MoreMenu({ showLabel }: { showLabel: boolean }) {
           )}
           <ThemeSwitcher />
           <ActivityStatusToggle />
+          <button
+            type="button"
+            role="menuitem"
+            className={itemClass}
+            onClick={() => {
+              close();
+              setChangingPassword(true);
+            }}
+          >
+            <KeyRound aria-hidden className="size-5" /> Change password
+          </button>
           <div className="bg-separator my-1 h-px" />
           <button
             type="button"
@@ -65,6 +78,7 @@ export function MoreMenu({ showLabel }: { showLabel: boolean }) {
         <Menu aria-hidden className="size-6" strokeWidth={open ? 2.75 : 2} />
         <span className={cn(open && "font-bold", showLabel ? SIDEBAR_LABEL : "sr-only")}>More</span>
       </button>
+      {changingPassword && <ChangePasswordModal onClose={() => setChangingPassword(false)} />}
     </div>
   );
 }
