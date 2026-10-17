@@ -34,11 +34,5 @@
   "engines": {
     "node": ">=20"
   },
-  "packageManager": "pnpm@10.0.0",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "unrs-resolver",
-      "sharp"
-    ]
-  }
+  "packageManager": "yarn@1.22.19"
 }
