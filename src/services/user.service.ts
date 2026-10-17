@@ -79,6 +79,26 @@ export interface SearchUser extends FollowListUser {
 export const SEARCH_MAX_LENGTH = 30;
 const SEARCH_LIMIT = 20;
 
+/** Item of GET /api/users/suggestions: someone you don't follow, and why they're suggested. */
+interface BackendSuggestion {
+  id: number;
+  username: string;
+  name: string;
+  avatarUrl: string;
+  isVerified: boolean;
+  followerCount: number;
+  followsYou: boolean;
+  mutualCount: number;
+  /** Up to 2 usernames of people you follow who follow them. */
+  mutuals: string[];
+}
+
+export interface SuggestedUser extends UserSummary {
+  followsYou: boolean;
+  mutualCount: number;
+  mutuals: string[];
+}
+
 export const userService = {
   list: (limit: number) => http.get<UserSummary[]>("/api/users", { params: { limit } }),
   /** Top matches by username or name (accents ignored), people you follow first. No pagination. */
@@ -94,6 +114,22 @@ export const userService = {
     http
       .get<BackendPublicProfile>(`/api/users/${encodeURIComponent(username)}`)
       .then((p): Profile => ({ user: toUser(p), isMe: p.isMe, isFollowing: p.isFollowing })),
+  /** People to follow: ones who follow you and ones with many mutuals first. */
+  suggestions: (limit: number) =>
+    http.get<BackendSuggestion[]>("/api/users/suggestions", { params: { limit } }).then((list) =>
+      list.map(
+        (u): SuggestedUser => ({
+          id: String(u.id),
+          username: u.username,
+          fullName: u.name,
+          avatar: u.avatarUrl || `https://i.pravatar.cc/150?u=${u.username}`,
+          isVerified: u.isVerified,
+          followsYou: u.followsYou,
+          mutualCount: u.mutualCount,
+          mutuals: u.mutuals,
+        }),
+      ),
+    ),
   /** People who follow `username`, most recent first. */
   followers: (username: string, params: { cursor?: string | null; limit?: number }) =>
     client.get<BackendListUser[]>(`/api/users/${encodeURIComponent(username)}/followers`, { params }).then(toFollowListPage),

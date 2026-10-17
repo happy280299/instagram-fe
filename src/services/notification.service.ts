@@ -5,7 +5,7 @@ import type { Activity, ActivityType, ISODate, Paginated } from "@/types";
 /** Item of GET /api/notifications. */
 interface BackendNotification {
   id: number;
-  type: "LIKE" | "COMMENT" | "FOLLOW";
+  type: "LIKE" | "COMMENT" | "FOLLOW" | "MENTION" | "REPLY" | "COMMENT_LIKE";
   createdAt: ISODate;
   isRead: boolean;
   actors: { id: number; username: string; avatarUrl: string; isVerified: boolean; isFollowing: boolean }[];
@@ -14,7 +14,14 @@ interface BackendNotification {
   comment: { id: number; content: string } | null;
 }
 
-const TYPES: Record<BackendNotification["type"], ActivityType> = { LIKE: "like", COMMENT: "comment", FOLLOW: "follow" };
+const TYPES: Record<BackendNotification["type"], ActivityType> = {
+  LIKE: "like",
+  COMMENT: "comment",
+  FOLLOW: "follow",
+  MENTION: "mention",
+  REPLY: "reply",
+  COMMENT_LIKE: "comment_like",
+};
 
 function toActivity(n: BackendNotification): Activity {
   return {

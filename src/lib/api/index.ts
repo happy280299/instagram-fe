@@ -1,7 +1,7 @@
 import type { AxiosRequestConfig, AxiosResponse } from "axios";
 import { client } from "./client";
 
-export { setApiToken, setUnauthorizedHandler } from "./client";
+export { setApiToken, setTokenRefresher, setUnauthorizedHandler } from "./client";
 export { getErrorMessage, HttpError } from "./error";
 
 export interface ApiResult<T> {

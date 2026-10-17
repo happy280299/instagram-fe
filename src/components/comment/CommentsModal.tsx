@@ -36,7 +36,7 @@ function CommentsBody({ postId }: { postId: ID }) {
           error={comments.error}
           onRetry={comments.loadMore}
           sentinelRef={comments.sentinelRef}
-          onDelete={(id) => void comments.remove(id)}
+          onDelete={(c) => void comments.remove(c)}
           onReply={(target) => {
             setReplyTo(target);
             inputRef.current?.focus();
@@ -55,6 +55,7 @@ function CommentsBody({ postId }: { postId: ID }) {
         <AddComment
           key={replyTo?.commentId ?? "root"}
           postId={postId}
+          parentId={replyTo?.commentId}
           defaultText={replyTo ? `@${replyTo.username} ` : ""}
           inputRef={inputRef}
           onAdded={(c) => {

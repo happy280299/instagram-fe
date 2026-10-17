@@ -76,6 +76,7 @@ export function toFeedPost(p: BackendFeedPost): FeedPost {
       author: { id: String(c.author.id), username: c.author.username },
     })),
     isReel: p.isReel,
+    ...(p.isReel ? { shareToFeed: p.shareToFeed } : {}),
     ...(p.viewCount != null ? { viewCount: p.viewCount } : {}),
     viewer: { liked: p.isLiked, saved: p.isSaved, followsAuthor: p.author.isFollowing },
   };
@@ -91,3 +92,19 @@ export const feedService = {
   list: (params: { cursor?: string | null; limit?: number }) =>
     client.get<BackendFeedPost[]>("/api/feed", { params }).then(toFeedPage),
 };
+
+/** Endpoints paged by `exclude` (Reels, Explore) accept at most this many ids. */
+const MAX_EXCLUDE = 200;
+
+/**
+ * One batch from an endpoint with no cursor (GET /api/reels, /api/explore): each batch excludes the
+ * ids already shown. That list rides in `cursor`, so it plugs into the usual paginated hook.
+ */
+export async function fetchExcludePage(url: string, { cursor, limit }: { cursor: string | null; limit: number }): Promise<Paginated<FeedPost>> {
+  const shown = cursor ? cursor.split(",").filter((id) => /^\d+$/.test(id)) : [];
+  const exclude = shown.slice(-MAX_EXCLUDE);
+  const { data, meta } = await client.get<BackendFeedPost[]>(url, { params: { limit, ...(exclude.length ? { exclude: exclude.join(",") } : {}) } });
+  const items = data.map(toFeedPost);
+  const hasMore = typeof meta === "object" && meta !== null && "hasMore" in meta && meta.hasMore === true;
+  return { items, nextCursor: hasMore ? [...shown, ...items.map((p) => p.id)].join(",") : null };
+}

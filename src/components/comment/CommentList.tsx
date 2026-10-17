@@ -4,7 +4,7 @@ import { MessageCircle } from "lucide-react";
 import type { ReactNode, Ref } from "react";
 import { Button } from "@/components/ui/Button";
 import { Skeleton } from "@/components/ui/Skeleton";
-import type { CommentThread } from "@/types";
+import type { CommentThread, CommentWithAuthor } from "@/types";
 import { CommentItem, type ReplyTarget } from "./CommentItem";
 
 interface CommentListProps {
@@ -15,7 +15,7 @@ interface CommentListProps {
   onRetry?: () => void;
   sentinelRef: Ref<HTMLDivElement>;
   onReply: (target: ReplyTarget) => void;
-  onDelete?: (commentId: string) => void;
+  onDelete?: (comment: CommentWithAuthor) => void;
   /** Rendered before the comments (e.g. the caption). */
   lead?: ReactNode;
 }

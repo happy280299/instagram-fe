@@ -22,6 +22,9 @@ interface UIState {
   createOpen: boolean;
   shareTarget: ShareTarget | null;
   commentsPostId: ID | null;
+  /** Comments whose replies are shown (opened, or a reply was just posted). Not persisted. */
+  expandedReplies: Record<ID, true>;
+  setRepliesExpanded: (commentId: ID, expanded: boolean) => void;
   toasts: Toast[];
   recentSearches: UserSummary[];
   /** Reels start muted so browsers allow autoplay. */
@@ -62,6 +65,14 @@ export const useUIStore = create<UIState>()(
       setCreateOpen: (createOpen) => set({ createOpen }),
       openShare: (shareTarget) => set({ shareTarget }),
       closeShare: () => set({ shareTarget: null }),
+      expandedReplies: {},
+      setRepliesExpanded: (commentId, expanded) =>
+        set((s) => {
+          const expandedReplies = { ...s.expandedReplies };
+          if (expanded) expandedReplies[commentId] = true;
+          else delete expandedReplies[commentId];
+          return { expandedReplies };
+        }),
       openComments: (commentsPostId) => set({ commentsPostId }),
       closeComments: () => set({ commentsPostId: null }),
       toast: (message) => {

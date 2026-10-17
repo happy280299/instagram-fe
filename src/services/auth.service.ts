@@ -1,6 +1,6 @@
 import type { AxiosResponse } from "axios";
-import { client, withMessage, type ApiResult } from "@/lib/api";
-import type { AuthResponse, BackendProfile, BackendUser, ID, LoginBody, RegisterBody, Session, UpdateProfileBody, User } from "@/types";
+import { client, http, withMessage, type ApiResult } from "@/lib/api";
+import type { AuthResponse, BackendProfile, BackendUser, ID, LoginBody, RegisterBody, Session, TokenPair, UpdateProfileBody, User } from "@/types";
 
 /** Shown when a user has no avatar; the backend stores "" for them. */
 export const placeholderAvatar = (userId: ID) => `https://i.pravatar.cc/300?u=${userId}`;
@@ -38,7 +38,7 @@ export interface AuthResult {
 
 function toAuthResult(response: AxiosResponse<AuthResponse>): AuthResult {
   const { data, message } = withMessage(response);
-  return { session: { accessToken: data.accessToken, user: toUser(data.user), followingIds: [] }, message };
+  return { session: { accessToken: data.accessToken, refreshToken: data.refreshToken, user: toUser(data.user), followingIds: [] }, message };
 }
 
 function toUserResult(response: AxiosResponse<BackendProfile>): ApiResult<User> {
@@ -49,6 +49,10 @@ function toUserResult(response: AxiosResponse<BackendProfile>): ApiResult<User> 
 export const authService = {
   login: (body: LoginBody) => client.post<AuthResponse>("/api/auth/login", body).then(toAuthResult),
   register: (body: RegisterBody) => client.post<AuthResponse>("/api/auth/register", body).then(toAuthResult),
+  /** Trades a refresh token for a new pair (rotation: the old one is dead afterwards). */
+  refresh: (refreshToken: string) => http.post<TokenPair>("/api/auth/refresh", { refreshToken }),
+  /** Ends this device's session on the server. */
+  logout: (refreshToken: string) => http.post("/api/auth/logout", { refreshToken }),
   me: () => client.get<BackendProfile>("/api/auth/me").then((r) => toUser(r.data)),
   updateMe: (body: UpdateProfileBody) => client.patch<BackendProfile>("/api/auth/me", body).then(toUserResult),
 };

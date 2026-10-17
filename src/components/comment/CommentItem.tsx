@@ -2,7 +2,6 @@
 
 import { Heart } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 import { Avatar } from "@/components/ui/Avatar";
 import { RichText } from "@/components/ui/RichText";
 import { TimeAgo } from "@/components/ui/TimeAgo";
@@ -10,6 +9,7 @@ import { cn } from "@/lib/cn";
 import { pluralize } from "@/lib/format";
 import { usePostStore } from "@/store/post";
 import type { CommentThread, CommentWithAuthor } from "@/types";
+import { CommentReplies } from "./CommentReplies";
 
 export interface ReplyTarget {
   commentId: string;
@@ -20,7 +20,7 @@ interface CommentItemProps {
   comment: CommentWithAuthor | CommentThread;
   onReply?: (target: ReplyTarget) => void;
   /** Shown for the viewer's own comments. */
-  onDelete?: (commentId: string) => void;
+  onDelete?: (comment: CommentWithAuthor) => void;
   /** Top-level id replies attach to (Instagram flattens nested replies). */
   rootId?: string;
 }
@@ -28,8 +28,6 @@ interface CommentItemProps {
 export function CommentItem({ comment, onReply, onDelete, rootId }: CommentItemProps) {
   const liked = usePostStore((s) => s.likedComments[comment.id] === true);
   const toggle = usePostStore((s) => s.toggleCommentLike);
-  const [showReplies, setShowReplies] = useState(false);
-  const replies = "replies" in comment ? comment.replies : [];
   const likes = comment.likes + (liked ? 1 : 0);
 
   return (
@@ -39,7 +37,7 @@ export function CommentItem({ comment, onReply, onDelete, rootId }: CommentItemP
           <Avatar src={comment.author.avatar} username={comment.author.username} size="sm" />
         </Link>
         <div className="min-w-0 flex-1 text-sm">
-          <p className="break-words">
+          <p className="wrap-break-word">
             <Link href={`/${comment.author.username}`} className="mr-1 font-semibold hover:opacity-60">
               {comment.author.username}
             </Link>
@@ -58,7 +56,7 @@ export function CommentItem({ comment, onReply, onDelete, rootId }: CommentItemP
               </button>
             )}
             {onDelete && comment.isMine && (
-              <button type="button" className="font-semibold hover:opacity-60" onClick={() => onDelete(comment.id)}>
+              <button type="button" className="font-semibold hover:opacity-60" onClick={() => onDelete(comment)}>
                 Delete
               </button>
             )}
@@ -66,7 +64,7 @@ export function CommentItem({ comment, onReply, onDelete, rootId }: CommentItemP
         </div>
         <button
           type="button"
-          onClick={() => toggle(comment.id)}
+          onClick={() => void toggle(comment.id)}
           aria-label={liked ? "Unlike comment" : "Like comment"}
           aria-pressed={liked}
           className="shrink-0 self-center p-1 hover:opacity-60"
@@ -74,26 +72,7 @@ export function CommentItem({ comment, onReply, onDelete, rootId }: CommentItemP
           <Heart aria-hidden className={cn("size-3", liked && "animate-like fill-like text-like")} />
         </button>
       </div>
-      {replies.length > 0 && (
-        <div className="mt-2 ml-11">
-          <button
-            type="button"
-            aria-expanded={showReplies}
-            onClick={() => setShowReplies((v) => !v)}
-            className="text-muted flex items-center gap-3 text-xs font-semibold"
-          >
-            <span aria-hidden className="bg-muted h-px w-6" />
-            {showReplies ? "Hide replies" : `View replies (${replies.length})`}
-          </button>
-          {showReplies && (
-            <ul>
-              {replies.map((reply) => (
-                <CommentItem key={reply.id} comment={reply} onReply={onReply} onDelete={onDelete} rootId={comment.id} />
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
+      {"replies" in comment && <CommentReplies comment={comment} onReply={onReply} onDelete={onDelete} />}
     </li>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { useAuthStore } from "@/store/auth";
+import { Suggestions } from "./Suggestions";
 
 function RowSkeleton() {
   return (
@@ -50,6 +51,7 @@ export function RightColumn() {
       ) : (
         <RowSkeleton />
       )}
+      <Suggestions />
       <p className="text-muted mt-8 text-xs leading-5">
         About · Help · Privacy · Terms · Language
         <br />© {new Date().getFullYear()} INSTACLONE — a UI demo

@@ -10,6 +10,8 @@ import type { CommentWithAuthor, ID } from "@/types";
 interface AddCommentProps {
   postId: ID;
   placeholder?: string;
+  /** Set when replying: the top-level comment it belongs to. */
+  parentId?: ID;
   /** Initial text (e.g. "@username " when replying). Remount via `key` to reset. */
   defaultText?: string;
   onAdded?: (comment: CommentWithAuthor) => void;
@@ -17,7 +19,7 @@ interface AddCommentProps {
   inputRef?: React.Ref<HTMLInputElement>;
 }
 
-export function AddComment({ postId, placeholder = "Add a comment…", defaultText = "", onAdded, className, inputRef }: AddCommentProps) {
+export function AddComment({ postId, parentId, placeholder = "Add a comment…", defaultText = "", onAdded, className, inputRef }: AddCommentProps) {
   const [text, setText] = useState(defaultText);
   const [sending, setSending] = useState(false);
 
@@ -27,7 +29,7 @@ export function AddComment({ postId, placeholder = "Add a comment…", defaultTe
     if (!body || sending) return;
     setSending(true);
     try {
-      const comment = await commentService.create(postId, body);
+      const comment = await commentService.create(postId, body, parentId);
       setText("");
       onAdded?.(comment);
     } catch (err) {

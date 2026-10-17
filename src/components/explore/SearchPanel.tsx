@@ -1,6 +1,7 @@
 "use client";
 
-import { Search, X } from "lucide-react";
+import { Hash, Search, X } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import { SlidePanel } from "@/components/ui/SlidePanel";
 import { Button } from "@/components/ui/Button";
@@ -8,7 +9,9 @@ import { Skeleton } from "@/components/ui/Skeleton";
 import { compactNumber } from "@/lib/format";
 import { SEARCH_MAX_LENGTH, type SearchUser } from "@/services/user.service";
 import { useUIStore } from "@/store/ui";
+import { hashtagHref } from "@/lib/parse-caption";
 import { SearchResultItem } from "./SearchResultItem";
+import { useHashtagSearch } from "./useHashtagSearch";
 import { useUserSearch } from "./useUserSearch";
 
 /** Like Instagram: who you follow, otherwise how many followers. */
@@ -25,14 +28,20 @@ export function SearchPanel() {
   const removeRecent = useUIStore((s) => s.removeRecentSearch);
   const clearRecent = useUIStore((s) => s.clearRecentSearches);
   const [query, setQuery] = useState("");
-  const { q, users, loading, error, retry } = useUserSearch(query);
+  // "#…" searches hashtags instead of people, like Instagram's search.
+  const hashtagMode = query.trim().startsWith("#");
+  const people = useUserSearch(hashtagMode ? "" : query);
+  const tagSearch = useHashtagSearch(hashtagMode ? query : "");
+  const { q, loading, error, retry } = hashtagMode ? tagSearch : people;
+  const { users } = people;
+  const { tags } = tagSearch;
 
   return (
     <SlidePanel title="Search" onClose={close}>
       <div className="border-separator border-b px-4 pb-6">
         <label className="bg-hover flex items-center gap-2 rounded-lg px-4 py-2">
           <Search aria-hidden className="text-muted size-4" />
-          <span className="sr-only">Search users</span>
+          <span className="sr-only">Search people or #hashtags</span>
           <input data-autofocus type="search" value={query} onChange={(e) => setQuery(e.target.value)} maxLength={SEARCH_MAX_LENGTH + 1} placeholder="Search" className="placeholder:text-muted flex-1 bg-transparent outline-none [&::-webkit-search-cancel-button]:hidden" />
           {query && (
             <button type="button" onClick={() => setQuery("")} aria-label="Clear search" className="bg-muted text-background rounded-full p-0.5">
@@ -77,6 +86,28 @@ export function SearchPanel() {
             </Button>
           </div>
         )}
+        {tags &&
+          (tags.length === 0 ? (
+            <p className="text-muted py-16 text-center text-sm">No hashtags found.</p>
+          ) : (
+            <ul>
+              {tags.map((t) => (
+                <li key={t.name}>
+                  <Link href={hashtagHref(t.name)} onClick={close} className="hover:bg-hover flex items-center gap-3 px-6 py-2">
+                    <span className="border-separator flex size-avatar-md shrink-0 items-center justify-center rounded-full border">
+                      <Hash aria-hidden className="size-5" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-sm font-semibold">#{t.name}</span>
+                      <span className="text-muted block text-sm">
+                        {compactNumber(t.postCount)} {t.postCount === 1 ? "post" : "posts"}
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ))}
         {users &&
           (users.length === 0 ? (
             <p className="text-muted py-16 text-center text-sm">No results found.</p>

@@ -5,6 +5,7 @@ export const queryKeys = {
   feed: ["feed"] as const,
   post: (postId: ID) => ["post", postId] as const,
   comments: (postId: ID) => ["comments", postId] as const,
+  commentReplies: (commentId: ID) => ["comment-replies", commentId] as const,
   profile: (username: string) => ["profile", username] as const,
   /** Prefix of every user's posts list, for updates that touch all of them. */
   allUserPosts: ["user-posts"] as const,
@@ -13,9 +14,18 @@ export const queryKeys = {
   savedPosts: ["saved-posts"] as const,
   /** The Reels tab, optionally starting at one reel (?r=). */
   reels: (startId: ID | null) => ["reels", startId] as const,
+  /** Prefixes of every Reels-tab session and every profile reels grid. */
+  allReels: ["reels"] as const,
+  allUserReels: ["user-reels"] as const,
   userReels: (username: string) => ["user-reels", username] as const,
   followers: (username: string) => ["followers", username] as const,
   following: (username: string) => ["following", username] as const,
+  hashtag: (name: string) => ["hashtag", name] as const,
+  allHashtagPosts: ["hashtag-posts"] as const,
+  hashtagPosts: (name: string) => ["hashtag-posts", name] as const,
+  hashtagSearch: (q: string) => ["hashtag-search", q] as const,
+  explore: ["explore"] as const,
+  suggestions: ["suggestions"] as const,
   userSearch: (q: string) => ["user-search", q] as const,
   notifications: ["notifications"] as const,
   unreadNotifications: ["notifications-unread"] as const,

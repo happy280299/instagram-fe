@@ -53,6 +53,8 @@ export interface Post {
   isReel?: boolean;
   /** Reels only. */
   viewCount?: number;
+  /** Reels only: also shown in the feed and the main profile grid. */
+  shareToFeed?: boolean;
 }
 
 export interface PostWithAuthor extends Post {
@@ -77,6 +79,8 @@ export interface Comment {
   createdAt: ISODate;
   /** Written by the viewer, so they can delete it. */
   isMine?: boolean;
+  /** Backend top-level comments: how many replies to load on demand. */
+  replyCount?: number;
 }
 
 export interface CommentWithAuthor extends Comment {
@@ -217,7 +221,7 @@ export interface Presence {
 }
 
 /** Kinds of backend activity (GET /api/notifications). */
-export type ActivityType = "like" | "comment" | "follow";
+export type ActivityType = "like" | "comment" | "follow" | "mention" | "reply" | "comment_like";
 
 export interface ActivityActor extends Pick<UserSummary, "id" | "username" | "avatar" | "isVerified"> {
   /** Whether the viewer follows them back. */
@@ -275,11 +279,20 @@ export interface Session {
   followingIds: ID[];
   /** JWT from the real backend; mock sessions (e.g. sign-up) have none. */
   accessToken?: string;
+  /** Long-lived (30 days); trades for a new token pair when the access token expires. */
+  refreshToken?: string;
+}
+
+/** Response of POST /api/auth/refresh. The old refresh token stops working at once. */
+export interface TokenPair {
+  accessToken: string;
+  refreshToken: string;
 }
 
 /** Response body of the backend's POST /api/auth/login. */
 export interface AuthResponse {
   accessToken: string;
+  refreshToken: string;
   user: BackendUser;
 }
 

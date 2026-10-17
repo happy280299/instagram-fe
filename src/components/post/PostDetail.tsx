@@ -46,7 +46,7 @@ export function PostDetail({ post, className }: PostDetailProps) {
             error={comments.error}
             onRetry={comments.loadMore}
             sentinelRef={comments.sentinelRef}
-            onDelete={(id) => void comments.remove(id)}
+            onDelete={(c) => void comments.remove(c)}
             onReply={(target) => {
               setReplyTo(target);
               inputRef.current?.focus();
@@ -70,6 +70,7 @@ export function PostDetail({ post, className }: PostDetailProps) {
           <AddComment
             key={replyTo?.commentId ?? "root"}
             postId={post.id}
+            parentId={replyTo?.commentId}
             defaultText={replyTo ? `@${replyTo.username} ` : ""}
             inputRef={inputRef}
             onAdded={(c) => {

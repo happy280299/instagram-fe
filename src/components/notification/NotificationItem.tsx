@@ -7,11 +7,24 @@ import { FollowButton } from "@/components/user/FollowButton";
 import { cn } from "@/lib/cn";
 import type { Activity } from "@/types";
 
-const VERB: Record<Activity["type"], string> = {
-  like: "liked your post.",
-  comment: "commented:",
-  follow: "started following you.",
-};
+/** What happened; a comment's text follows the ones ending in ":". */
+function verbOf(activity: Activity): string {
+  switch (activity.type) {
+    case "like":
+      return "liked your post.";
+    case "comment":
+      return "commented:";
+    case "follow":
+      return "started following you.";
+    case "reply":
+      return "replied to your comment:";
+    case "comment_like":
+      return "liked your comment:";
+    case "mention":
+      // In a comment the backend sends its text; in a caption it doesn't.
+      return activity.commentText ? "mentioned you in a comment:" : "mentioned you in a post.";
+  }
+}
 
 /** "a", "a and b", "a, b and 3 others": the backend sends the latest actors plus a total. */
 function ActorNames({ activity }: { activity: Activity }) {
@@ -52,7 +65,7 @@ export function NotificationItem({ activity }: { activity: Activity }) {
         )}
       </Link>
       <p className="min-w-0 flex-1 text-sm">
-        <ActorNames activity={activity} /> {VERB[activity.type]}
+        <ActorNames activity={activity} /> {verbOf(activity)}
         {activity.commentText && <> {activity.commentText}</>} <TimeAgo date={activity.createdAt} className="text-muted" />
       </p>
       {!activity.isRead && <span aria-label="New" className="bg-primary size-2 shrink-0 rounded-full" />}

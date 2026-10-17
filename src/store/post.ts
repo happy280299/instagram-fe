@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { getErrorMessage } from "@/lib/api";
+import { commentService } from "@/services/comment.service";
 import { postService } from "@/services/post.service";
 import { POSTS_STORAGE_KEY } from "@/lib/constants";
 import { updateCachedPost } from "@/lib/post-cache";
@@ -20,7 +21,9 @@ interface PostState {
   setLike: (postId: ID, liked: boolean) => Promise<void>;
   toggleLike: (postId: ID) => Promise<void>;
   toggleSave: (postId: ID) => Promise<void>;
-  toggleCommentLike: (commentId: ID) => void;
+  toggleCommentLike: (commentId: ID) => Promise<void>;
+  /** Adopts the server's liked flags for comments just loaded from the backend. */
+  syncCommentLikes: (comments: { id: ID; liked: boolean }[]) => void;
   markStorySeen: (storyId: ID) => void;
   /** Adopts the server's liked/saved flags for posts just loaded from the backend. */
   syncViewerState: (posts: { id: ID; liked: boolean; saved: boolean }[]) => void;
@@ -63,8 +66,20 @@ export const usePostStore = create<PostState>()(
           toast(getErrorMessage(err, "Couldn't update saved posts. Try again."));
         }
       },
-      toggleCommentLike: (commentId) =>
-        set((s) => ({ likedComments: { ...s.likedComments, [commentId]: !s.likedComments[commentId] } })),
+      toggleCommentLike: async (commentId) => {
+        const next = !get().likedComments[commentId];
+        set((s) => ({ likedComments: { ...s.likedComments, [commentId]: next } }));
+        // Mock comments (ids like "c1") only exist locally.
+        if (!/^\d+$/.test(commentId)) return;
+        try {
+          await commentService.setLiked(commentId, next);
+        } catch (err) {
+          set((s) => ({ likedComments: { ...s.likedComments, [commentId]: !next } }));
+          toast(getErrorMessage(err, "Couldn't update like. Try again."));
+        }
+      },
+      syncCommentLikes: (comments) =>
+        set((s) => ({ likedComments: { ...s.likedComments, ...Object.fromEntries(comments.map((c) => [c.id, c.liked])) } })),
       markStorySeen: (storyId) => set((s) => (s.seenStories[storyId] ? s : { seenStories: { ...s.seenStories, [storyId]: true } })),
       syncViewerState: (posts) =>
         set((s) => {
